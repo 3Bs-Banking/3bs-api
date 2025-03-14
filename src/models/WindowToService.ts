@@ -1,4 +1,4 @@
-import { Entity, ManyToOne, Column, PrimaryGeneratedColumn } from "typeorm";
+import { Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 import { Window } from "./Window";
 import { Service } from "./Service";
 
