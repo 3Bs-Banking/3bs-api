@@ -9,26 +9,26 @@ import { User } from "./User";
 @Entity()
 export class Bank {
   @PrimaryGeneratedColumn("uuid")
-  BankID!: string;
+  id!: string;
 
   @Column({ type: "varchar", length: 255 })
-  BankName!: string;
+  name!: string;
 
-  @OneToMany(() => Branch, (branch) => branch.Bank)
-  Branches!: Branch[];
+  @OneToMany(() => Branch, (branch) => branch.bank)
+  branches!: Branch[];
 
-  @OneToMany(() => Service, (service) => service.Bank)
-  Services!: Service[];
+  @OneToMany(() => Service, (service) => service.bank)
+  services!: Service[];
 
-  @OneToMany(() => Employee, (employee) => employee.Bank)
-  Employees!: Employee[];
+  @OneToMany(() => Employee, (employee) => employee.bank)
+  employees!: Employee[];
 
-  @OneToMany(() => Window, (window) => window.Bank)
-  Windows!: Window[];
+  @OneToMany(() => Window, (window) => window.bank)
+  windows!: Window[];
 
-  @OneToMany(() => Setting, (setting) => setting.Bank)
-  Settings!: Setting[];
+  @OneToMany(() => Setting, (setting) => setting.bank)
+  settings!: Setting[];
 
-  @OneToMany(() => User, (user) => user.Bank)
-  Users!: User[];
+  @OneToMany(() => User, (user) => user.bank)
+  users!: User[];
 }

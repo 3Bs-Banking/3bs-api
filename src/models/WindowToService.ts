@@ -5,15 +5,15 @@ import { Service } from "./Service";
 @Entity()
 export class WindowToService {
   @PrimaryGeneratedColumn("uuid")
-  ID!: string;
+  id!: string;
 
-  @ManyToOne(() => Window, (window) => window.WindowServices, {
+  @ManyToOne(() => Window, (window) => window.windowServices, {
     onDelete: "CASCADE"
   })
-  Window!: Window;
+  window!: Window;
 
-  @ManyToOne(() => Service, (service) => service.WindowServices, {
+  @ManyToOne(() => Service, (service) => service.windowServices, {
     onDelete: "CASCADE"
   })
-  Service!: Service;
+  service!: Service;
 }

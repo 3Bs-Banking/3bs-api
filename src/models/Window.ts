@@ -13,26 +13,26 @@ import { Appointment } from "./Appointment";
 @Entity()
 export class Window {
   @PrimaryGeneratedColumn("uuid")
-  ID!: string;
+  id!: string;
 
-  @ManyToOne(() => Bank, (bank) => bank.Windows, { onDelete: "CASCADE" })
-  Bank!: Bank;
+  @ManyToOne(() => Bank, (bank) => bank.windows, { onDelete: "CASCADE" })
+  bank!: Bank;
 
-  @ManyToOne(() => Branch, (branch) => branch.Windows, { onDelete: "CASCADE" })
-  Branch!: Branch;
+  @ManyToOne(() => Branch, (branch) => branch.windows, { onDelete: "CASCADE" })
+  branch!: Branch;
 
   @Column({ type: "integer" })
-  WindowNumber!: number;
+  windowNumber!: number;
 
   @Column({ type: "varchar", length: 255, nullable: true })
-  Category!: string | null;
+  category!: string | null;
 
   @Column({ type: "integer", nullable: true })
-  CurrentAppointmentID!: number | null;
+  currentAppointmentID!: number | null;
 
-  @OneToMany(() => WindowToService, (windowToService) => windowToService.Window)
-  WindowServices!: WindowToService[];
+  @OneToMany(() => WindowToService, (windowToService) => windowToService.window)
+  windowServices!: WindowToService[];
 
-  @OneToMany(() => Appointment, (appointment) => appointment.Window)
-  Appointments!: Appointment[];
+  @OneToMany(() => Appointment, (appointment) => appointment.window)
+  appointments!: Appointment[];
 }

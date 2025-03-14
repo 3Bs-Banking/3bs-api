@@ -13,37 +13,37 @@ import { Feedback } from "./Feedback";
 @Entity()
 export class Employee {
   @PrimaryGeneratedColumn("uuid")
-  EmployeeID!: string;
+  id!: string;
 
-  @ManyToOne(() => Bank, (bank) => bank.Employees, { onDelete: "CASCADE" })
-  Bank!: Bank;
+  @ManyToOne(() => Bank, (bank) => bank.employees, { onDelete: "CASCADE" })
+  bank!: Bank;
 
-  @ManyToOne(() => Branch, (branch) => branch.Employees, {
+  @ManyToOne(() => Branch, (branch) => branch.employees, {
     onDelete: "CASCADE"
   })
-  Branch!: Branch;
+  branch!: Branch;
 
   @Column({ type: "varchar", length: 255 })
-  FullName!: string;
+  fullName!: string;
 
   @Column({ type: "varchar", length: 100, nullable: true })
-  RoleName!: string | null;
+  roleName!: string | null;
 
   @Column({ type: "varchar", length: 255, unique: true })
-  Email!: string;
+  email!: string;
 
   @Column({ type: "varchar", length: 20, nullable: true })
-  PhoneNumber!: string | null;
+  phoneNumber!: string | null;
 
   @Column({ type: "integer", nullable: true })
-  AssignedWindowID!: number | null;
+  assignedWindowID!: number | null;
 
   @Column({ type: "time", nullable: true })
-  ShiftTime!: string | null;
+  shiftTime!: string | null;
 
-  @OneToMany(() => Appointment, (appointment) => appointment.Employee)
-  Appointments!: Appointment[];
+  @OneToMany(() => Appointment, (appointment) => appointment.employee)
+  appointments!: Appointment[];
 
-  @OneToMany(() => Feedback, (feedback) => feedback.Employee)
-  Feedbacks!: Feedback[];
+  @OneToMany(() => Feedback, (feedback) => feedback.employee)
+  feedbacks!: Feedback[];
 }

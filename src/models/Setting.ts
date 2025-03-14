@@ -4,14 +4,14 @@ import { Bank } from "./Bank";
 @Entity()
 export class Setting {
   @PrimaryGeneratedColumn("uuid")
-  SettingID!: string;
+  id!: string;
 
-  @ManyToOne(() => Bank, (bank) => bank.Settings, { onDelete: "CASCADE" })
-  Bank!: Bank;
+  @ManyToOne(() => Bank, (bank) => bank.settings, { onDelete: "CASCADE" })
+  bank!: Bank;
 
   @Column({ type: "varchar", length: 255 })
-  Key!: string;
+  key!: string;
 
   @Column({ type: "text" })
-  Value!: string;
+  value!: string;
 }

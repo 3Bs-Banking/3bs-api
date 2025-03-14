@@ -20,60 +20,60 @@ export enum ReservationType {
 @Entity()
 export class Appointment {
   @PrimaryGeneratedColumn("uuid")
-  AppointmentID!: string;
+  id!: string;
 
-  @ManyToOne(() => Branch, (branch) => branch.Appointments, {
+  @ManyToOne(() => Branch, (branch) => branch.appointments, {
     onDelete: "CASCADE"
   })
-  Branch!: Branch;
+  branch!: Branch;
 
-  @ManyToOne(() => Service, (service) => service.Appointments, {
+  @ManyToOne(() => Service, (service) => service.appointments, {
     onDelete: "CASCADE"
   })
-  Service!: Service;
+  service!: Service;
 
-  @ManyToOne(() => Customer, (customer) => customer.Appointments, {
+  @ManyToOne(() => Customer, (customer) => customer.appointments, {
     onDelete: "CASCADE"
   })
-  Customer!: Customer;
+  customer!: Customer;
 
-  @ManyToOne(() => Window, (window) => window.Appointments, {
+  @ManyToOne(() => Window, (window) => window.appointments, {
     onDelete: "CASCADE"
   })
-  Window!: Window;
+  window!: Window;
 
-  @ManyToOne(() => Employee, (employee) => employee.Appointments, {
+  @ManyToOne(() => Employee, (employee) => employee.appointments, {
     onDelete: "SET NULL"
   })
-  Employee!: Employee | null;
+  employee!: Employee | null;
 
   @Column({ type: "date" })
-  AppointmentStartDate!: Date;
+  appointmentStartDate!: Date;
 
   @Column({ type: "time" })
-  AppointmentStartTime!: string;
+  appointmentStartTime!: string;
 
   @Column({ type: "date", nullable: true })
-  AppointmentEndDate!: Date | null;
+  appointmentEndDate!: Date | null;
 
   @Column({ type: "time", nullable: true })
-  AppointmentEndTime!: string | null;
+  appointmentEndTime!: string | null;
 
   @Column({
     type: "enum",
     enum: AppointmentStatus,
     default: AppointmentStatus.PENDING
   })
-  Status!: AppointmentStatus;
+  status!: AppointmentStatus;
 
   @Column({
     type: "enum",
     enum: ReservationType
   })
-  ReservationType!: ReservationType;
+  reservationType!: ReservationType;
 
-  @ManyToOne(() => Feedback, (feedback) => feedback.Appointment, {
+  @ManyToOne(() => Feedback, (feedback) => feedback.appointment, {
     onDelete: "SET NULL"
   })
-  Feedback!: Feedback | null;
+  feedback!: Feedback | null;
 }

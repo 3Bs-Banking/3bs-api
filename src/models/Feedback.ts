@@ -5,24 +5,24 @@ import { Employee } from "./Employee";
 @Entity()
 export class Feedback {
   @PrimaryGeneratedColumn("uuid")
-  FeedbackID!: string;
+  id!: string;
 
-  @ManyToOne(() => Appointment, (appointment) => appointment.Feedback, {
+  @ManyToOne(() => Appointment, (appointment) => appointment.feedback, {
     onDelete: "CASCADE"
   })
-  Appointment!: Appointment;
+  appointment!: Appointment;
 
   @Column({ type: "integer" })
-  SatisfactionRating!: number;
+  satisfactionRating!: number;
 
   @Column({ type: "integer" })
-  TimeResolutionRating!: number;
+  timeResolutionRating!: number;
 
   @Column({ type: "text", nullable: true })
-  Comment!: string | null;
+  comment!: string | null;
 
-  @ManyToOne(() => Employee, (employee) => employee.Feedbacks, {
+  @ManyToOne(() => Employee, (employee) => employee.feedbacks, {
     onDelete: "SET NULL"
   })
-  Employee!: Employee | null;
+  employee!: Employee | null;
 }

@@ -11,28 +11,28 @@ import { Appointment } from "./Appointment";
 @Entity()
 export class Customer {
   @PrimaryGeneratedColumn("uuid")
-  CustomerID!: string;
+  id!: string;
 
   @Column({ type: "varchar", length: 255 })
-  FullName!: string;
+  fullName!: string;
 
   @Column({ type: "varchar", length: 255, unique: true })
-  Email!: string;
+  email!: string;
 
   @Column({ type: "varchar", length: 20, nullable: true })
-  PhoneNumber!: string | null;
+  phoneNumber!: string | null;
 
-  @ManyToOne(() => Branch, (branch) => branch.Customers, {
+  @ManyToOne(() => Branch, (branch) => branch.customers, {
     onDelete: "SET NULL"
   })
-  PreferredBranch!: Branch | null;
+  preferredBranch!: Branch | null;
 
   @Column({ type: "float", nullable: true })
-  HomeLatitude!: number | null;
+  homeLatitude!: number | null;
 
   @Column({ type: "float", nullable: true })
-  HomeLongitude!: number | null;
+  homeLongitude!: number | null;
 
-  @OneToMany(() => Appointment, (appointment) => appointment.Customer)
-  Appointments!: Appointment[];
+  @OneToMany(() => Appointment, (appointment) => appointment.customer)
+  appointments!: Appointment[];
 }
