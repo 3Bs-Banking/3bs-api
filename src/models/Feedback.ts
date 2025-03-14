@@ -1,24 +1,28 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
-import { Appointment } from './Appointment';
-import { Employee } from './Employee';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from "typeorm";
+import { Appointment } from "./Appointment";
+import { Employee } from "./Employee";
 
 @Entity()
 export class Feedback {
   @PrimaryGeneratedColumn("uuid")
-  FeedbackID!: string;
+  id!: string;
 
-  @ManyToOne(() => Appointment, appointment => appointment.Feedback, { onDelete: 'CASCADE' })
-  Appointment!: Appointment;
+  @ManyToOne(() => Appointment, (appointment) => appointment.feedback, {
+    onDelete: "CASCADE"
+  })
+  appointment!: Appointment;
 
-  @Column({ type: 'integer' })
-  SatisfactionRating!: number;
+  @Column({ type: "integer" })
+  satisfactionRating!: number;
 
-  @Column({ type: 'integer' })
-  TimeResolutionRating!: number;
+  @Column({ type: "integer" })
+  timeResolutionRating!: number;
 
-  @Column({ type: 'text', nullable: true })
-  Comment!: string | null;
+  @Column({ type: "text", nullable: true })
+  comment!: string | null;
 
-  @ManyToOne(() => Employee, employee => employee.Feedbacks, { onDelete: 'SET NULL' })
-  Employee!: Employee | null;
+  @ManyToOne(() => Employee, (employee) => employee.feedbacks, {
+    onDelete: "SET NULL"
+  })
+  employee!: Employee | null;
 }

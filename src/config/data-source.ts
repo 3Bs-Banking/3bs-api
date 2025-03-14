@@ -11,6 +11,7 @@ import { Appointment } from "../models/Appointment";
 import { Feedback } from "../models/Feedback";
 import { Setting } from "../models/Setting";
 import { User } from "../models/User";
+import { SnakeNamingStrategy } from "typeorm-naming-strategies";
 
 export const AppDataSource = new DataSource({
   type: "postgres",
@@ -38,4 +39,5 @@ export const AppDataSource = new DataSource({
   ],
   migrations: [],
   subscribers: [],
+  namingStrategy: new SnakeNamingStrategy()
 });

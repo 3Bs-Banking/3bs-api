@@ -15,5 +15,5 @@
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true
   },
-  "exclude": ["jest.config.ts"]
+  "exclude": ["jest.config.ts", "eslint.config.ts"]
 }

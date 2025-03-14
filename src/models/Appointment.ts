@@ -1,67 +1,79 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
-import { Branch } from './Branch';
-import { Service } from './Service';
-import { Customer } from './Customer';
-import { Window } from './Window';
-import { Employee } from './Employee';
-import { Feedback } from './Feedback';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from "typeorm";
+import { Branch } from "./Branch";
+import { Service } from "./Service";
+import { Customer } from "./Customer";
+import { Window } from "./Window";
+import { Employee } from "./Employee";
+import { Feedback } from "./Feedback";
 
 export enum AppointmentStatus {
-  PENDING = 'Pending',
-  COMPLETED = 'Completed',
-  CANCELED = 'Canceled'
+  PENDING = "Pending",
+  COMPLETED = "Completed",
+  CANCELED = "Canceled"
 }
 
 export enum ReservationType {
-  ONLINE = 'Online',
-  OFFLINE = 'Offline'
+  ONLINE = "Online",
+  OFFLINE = "Offline"
 }
 
 @Entity()
 export class Appointment {
   @PrimaryGeneratedColumn("uuid")
-  AppointmentID!: string;
+  id!: string;
 
-  @ManyToOne(() => Branch, branch => branch.Appointments, { onDelete: 'CASCADE' })
-  Branch!: Branch;
+  @ManyToOne(() => Branch, (branch) => branch.appointments, {
+    onDelete: "CASCADE"
+  })
+  branch!: Branch;
 
-  @ManyToOne(() => Service, service => service.Appointments, { onDelete: 'CASCADE' })
-  Service!: Service;
+  @ManyToOne(() => Service, (service) => service.appointments, {
+    onDelete: "CASCADE"
+  })
+  service!: Service;
 
-  @ManyToOne(() => Customer, customer => customer.Appointments, { onDelete: 'CASCADE' })
-  Customer!: Customer;
+  @ManyToOne(() => Customer, (customer) => customer.appointments, {
+    onDelete: "CASCADE"
+  })
+  customer!: Customer;
 
-  @ManyToOne(() => Window, window => window.Appointments, { onDelete: 'CASCADE' })
-  Window!: Window;
+  @ManyToOne(() => Window, (window) => window.appointments, {
+    onDelete: "CASCADE"
+  })
+  window!: Window;
 
-  @ManyToOne(() => Employee, employee => employee.Appointments, { onDelete: 'SET NULL' })
-  Employee!: Employee | null;
+  @ManyToOne(() => Employee, (employee) => employee.appointments, {
+    onDelete: "SET NULL"
+  })
+  employee!: Employee | null;
 
-  @Column({ type: 'date' })
-  AppointmentStartDate!: Date;
+  @Column({ type: "date" })
+  appointmentStartDate!: Date;
 
-  @Column({ type: 'time' })
-  AppointmentStartTime!: string;
+  @Column({ type: "time" })
+  appointmentStartTime!: string;
 
-  @Column({ type: 'date', nullable: true })
-  AppointmentEndDate!: Date | null;
+  @Column({ type: "date", nullable: true })
+  appointmentEndDate!: Date | null;
 
-  @Column({ type: 'time', nullable: true })
-  AppointmentEndTime!: string | null;
+  @Column({ type: "time", nullable: true })
+  appointmentEndTime!: string | null;
 
   @Column({
-    type: 'enum',
+    type: "enum",
     enum: AppointmentStatus,
     default: AppointmentStatus.PENDING
   })
-  Status!: AppointmentStatus;
+  status!: AppointmentStatus;
 
   @Column({
-    type: 'enum',
+    type: "enum",
     enum: ReservationType
   })
-  ReservationType!: ReservationType;
+  reservationType!: ReservationType;
 
-  @ManyToOne(() => Feedback, feedback => feedback.Appointment, { onDelete: 'SET NULL' })
-  Feedback!: Feedback | null;
+  @ManyToOne(() => Feedback, (feedback) => feedback.appointment, {
+    onDelete: "SET NULL"
+  })
+  feedback!: Feedback | null;
 }

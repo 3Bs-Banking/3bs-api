@@ -1,41 +1,49 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToMany } from 'typeorm';
-import { Bank } from './Bank';
-import { Branch } from './Branch';
-import { Appointment } from './Appointment';
-import { Feedback } from './Feedback';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  ManyToOne,
+  OneToMany
+} from "typeorm";
+import { Bank } from "./Bank";
+import { Branch } from "./Branch";
+import { Appointment } from "./Appointment";
+import { Feedback } from "./Feedback";
 
 @Entity()
 export class Employee {
   @PrimaryGeneratedColumn("uuid")
-  EmployeeID!: string;
+  id!: string;
 
-  @ManyToOne(() => Bank, bank => bank.Employees, { onDelete: 'CASCADE' })
-  Bank!: Bank;
+  @ManyToOne(() => Bank, (bank) => bank.employees, { onDelete: "CASCADE" })
+  bank!: Bank;
 
-  @ManyToOne(() => Branch, branch => branch.Employees, { onDelete: 'CASCADE' })
-  Branch!: Branch;
+  @ManyToOne(() => Branch, (branch) => branch.employees, {
+    onDelete: "CASCADE"
+  })
+  branch!: Branch;
 
-  @Column({ type: 'varchar', length: 255 })
-  FullName!: string;
+  @Column({ type: "varchar", length: 255 })
+  fullName!: string;
 
-  @Column({ type: 'varchar', length: 100, nullable: true })
-  RoleName!: string | null;
+  @Column({ type: "varchar", length: 100, nullable: true })
+  roleName!: string | null;
 
-  @Column({ type: 'varchar', length: 255, unique: true })
-  Email!: string;
+  @Column({ type: "varchar", length: 255, unique: true })
+  email!: string;
 
-  @Column({ type: 'varchar', length: 20, nullable: true })
-  PhoneNumber!: string | null;
+  @Column({ type: "varchar", length: 20, nullable: true })
+  phoneNumber!: string | null;
 
-  @Column({ type: 'integer', nullable: true })
-  AssignedWindowID!: number | null;
+  @Column({ type: "integer", nullable: true })
+  assignedWindowID!: number | null;
 
-  @Column({ type: 'time', nullable: true })
-  ShiftTime!: string | null;
+  @Column({ type: "time", nullable: true })
+  shiftTime!: string | null;
 
-  @OneToMany(() => Appointment, appointment => appointment.Employee)
-  Appointments!: Appointment[];
+  @OneToMany(() => Appointment, (appointment) => appointment.employee)
+  appointments!: Appointment[];
 
-  @OneToMany(() => Feedback, feedback => feedback.Employee)
-  Feedbacks!: Feedback[];
+  @OneToMany(() => Feedback, (feedback) => feedback.employee)
+  feedbacks!: Feedback[];
 }

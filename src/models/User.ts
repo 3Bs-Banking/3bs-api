@@ -1,26 +1,26 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
-import { Bank } from './Bank';
-import { Branch } from './Branch';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from "typeorm";
+import { Bank } from "./Bank";
+import { Branch } from "./Branch";
 
 export enum UserRole {
-  ADMIN = 'Admin',
-  MANAGER = 'Manager'
+  ADMIN = "Admin",
+  MANAGER = "Manager"
 }
 
 @Entity()
 export class User {
   @PrimaryGeneratedColumn("uuid")
-  UserID!: string;
+  id!: string;
 
-  @ManyToOne(() => Bank, bank => bank.Users, { onDelete: 'CASCADE' })
-  Bank!: Bank;
+  @ManyToOne(() => Bank, (bank) => bank.users, { onDelete: "CASCADE" })
+  bank!: Bank;
 
-  @ManyToOne(() => Branch, branch => branch.Users, { onDelete: 'CASCADE' })
-  Branch!: Branch;
+  @ManyToOne(() => Branch, (branch) => branch.users, { onDelete: "CASCADE" })
+  branch!: Branch;
 
   @Column({
-    type: 'enum',
+    type: "enum",
     enum: UserRole
   })
-  Role!: UserRole;
+  role!: UserRole;
 }
