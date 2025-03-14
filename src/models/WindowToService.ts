@@ -1,20 +1,19 @@
-import { Entity, ManyToOne, Column, PrimaryGeneratedColumn } from 'typeorm';
-import { Window } from './Window';
-import { Service } from './Service';
+import { Entity, ManyToOne, Column, PrimaryGeneratedColumn } from "typeorm";
+import { Window } from "./Window";
+import { Service } from "./Service";
 
 @Entity()
 export class WindowToService {
   @PrimaryGeneratedColumn("uuid")
-    ID!: string;
-  // @Column({ type: "varchar" })
-  // WindowID!: string;
+  ID!: string;
 
-  // @Column({ type: "varchar" })
-  // ServiceID!: string;
-
-  @ManyToOne(() => Window, window => window.WindowServices, { onDelete: 'CASCADE' })
+  @ManyToOne(() => Window, (window) => window.WindowServices, {
+    onDelete: "CASCADE"
+  })
   Window!: Window;
 
-  @ManyToOne(() => Service, service => service.WindowServices, { onDelete: 'CASCADE' })
+  @ManyToOne(() => Service, (service) => service.WindowServices, {
+    onDelete: "CASCADE"
+  })
   Service!: Service;
 }
