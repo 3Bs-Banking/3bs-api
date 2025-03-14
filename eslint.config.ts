@@ -27,7 +27,11 @@ const config: Linter.Config[] = [
       "comma-dangle": ["error", "never"],
       indent: ["error", 2, { ignoredNodes: ["PropertyDefinition"] }],
       quotes: ["error", "double"],
-      semi: ["error", "always"]
+      semi: ["error", "always"],
+      "@typescript-eslint/no-unused-vars": [
+        "warn",
+        { vars: "all", args: "after-used", ignoreRestSiblings: false }
+      ]
     }
   }
 ];
