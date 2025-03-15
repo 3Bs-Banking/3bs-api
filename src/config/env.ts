@@ -3,6 +3,7 @@ import { z } from "zod";
 dotenvConfig();
 
 const envVariables = z.object({
+  NODE_ENV: z.enum(["development", "production"]),
   DB_HOST: z.string(),
   DB_PORT: z.string(),
   DB_USERNAME: z.string(),
