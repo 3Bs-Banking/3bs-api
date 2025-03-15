@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only -r tsconfig-paths/register src/server.ts",
     "start": "node dist/server.js",
-    "build": "tsc",
+    "build": "tsc && tsc-alias",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
@@ -44,6 +44,7 @@
     "prettier": "^3.5.3",
     "ts-jest": "^29.2.6",
     "ts-node-dev": "^2.0.0",
+    "tsc-alias": "^1.8.11",
     "tsconfig-paths": "^4.2.0",
     "typescript": "^5.7.3"
   }
