@@ -5,7 +5,9 @@ import { z } from "zod";
 
 @Service()
 export class BankController {
-  private service = Container.get(BankService);
+  private get service() {
+    return Container.get(BankService);
+  }
 
   public async list(req: Request, res: Response): Promise<void> {
     const banks = await this.service.findAll();
