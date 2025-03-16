@@ -4,6 +4,10 @@ import BaseService from "./BaseService";
 import { DeepPartial, ObjectLiteral } from "typeorm";
 import Container from "typedi";
 
+/**
+ * Interface defining the options for configuring a BaseController.
+ * @template T - The entity type.
+ */
 export interface BaseControllerOptions<T extends ObjectLiteral> {
   keySingle: string;
   keyPlural: string;
@@ -13,12 +17,21 @@ export interface BaseControllerOptions<T extends ObjectLiteral> {
 
 const uuidSchema = z.string().uuid();
 
+/**
+ * Abstract base controller for handling CRUD operations.
+ * @template T - The entity type.
+ */
 export abstract class BaseController<T extends ObjectLiteral> {
   private keySingle: string;
   private keyPlural: string;
   private schema: ZodType<DeepPartial<T>>;
   private updateSchema?: ZodType<DeepPartial<T>>;
 
+  /**
+   * Creates an instance of BaseController.
+   * @param serviceClass - The service class responsible for entity operations.
+   * @param options - Configuration options for the controller.
+   */
   public constructor(
     private serviceClass: new () => BaseService<T>,
     options: BaseControllerOptions<T>
@@ -29,11 +42,20 @@ export abstract class BaseController<T extends ObjectLiteral> {
     this.updateSchema = options.updateSchema;
   }
 
+  /**
+   * Retrieves the service instance from the container.
+   * @returns The service instance.
+   */
   private get service(): BaseService<T> {
     return Container.get(this.serviceClass);
   }
 
-  private isValidUUID(id: string) {
+  /**
+   * Validates if a given ID is a valid UUIDv4.
+   * @param id - The ID to validate.
+   * @returns True if the ID is a valid UUIDv4, otherwise false.
+   */
+  private isValidUUID(id: string): boolean {
     try {
       uuidSchema.parse(id);
       return true;
@@ -42,12 +64,21 @@ export abstract class BaseController<T extends ObjectLiteral> {
     }
   }
 
+  /**
+   * Handles the request to list all entities.
+   * @param req - The request object.
+   * @param res - The response object.
+   */
   public async list(req: Request, res: Response): Promise<void> {
     const entities = await this.service.findAll();
-
     res.json({ data: { [this.keyPlural]: entities } });
   }
 
+  /**
+   * Handles the request to get an entity by ID.
+   * @param req - The request object.
+   * @param res - The response object.
+   */
   public async getId(req: Request, res: Response): Promise<void> {
     const id = req.params[this.keySingle];
 
@@ -66,6 +97,11 @@ export abstract class BaseController<T extends ObjectLiteral> {
     res.json({ data: { [this.keySingle]: entity } });
   }
 
+  /**
+   * Handles the request to create a new entity.
+   * @param req - The request object.
+   * @param res - The response object.
+   */
   public async post(req: Request, res: Response): Promise<void> {
     const parsedBody = this.schema.safeParse(req.body);
     if (!parsedBody.success) {
@@ -74,17 +110,21 @@ export abstract class BaseController<T extends ObjectLiteral> {
     }
 
     try {
-      const bank = await this.service.create(parsedBody.data);
-      res.json({ data: { bank } });
+      const entity = await this.service.create(parsedBody.data);
+      res.json({ data: { [this.keySingle]: entity } });
     } catch (error) {
       if (error instanceof Error) {
         console.error(error);
         res.status(500).json({ error: { message: "Internal server error" } });
-        return;
       }
     }
   }
 
+  /**
+   * Handles the request to update an existing entity.
+   * @param req - The request object.
+   * @param res - The response object.
+   */
   public async update(req: Request, res: Response): Promise<void> {
     const id = req.params[this.keySingle];
 
@@ -100,17 +140,21 @@ export abstract class BaseController<T extends ObjectLiteral> {
     }
 
     try {
-      const bank = this.service.update(id, parsedBody.data);
-      res.json({ data: { bank } });
+      const entity = await this.service.update(id, parsedBody.data);
+      res.json({ data: { [this.keySingle]: entity } });
     } catch (error) {
       if (error instanceof Error) {
         console.error(error);
         res.status(500).json({ error: { message: "Internal server error" } });
-        return;
       }
     }
   }
 
+  /**
+   * Handles the request to delete an entity by ID.
+   * @param req - The request object.
+   * @param res - The response object.
+   */
   public async delete(req: Request, res: Response): Promise<void> {
     const id = req.params[this.keySingle];
 
