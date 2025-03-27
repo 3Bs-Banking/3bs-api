@@ -4,7 +4,7 @@ import { Container } from "typedi";
 import express from "express";
 import { AppDataSource as db } from "@/config/data-source";
 import apiConfig from "@/config/api";
-import apiRoute from "@/routes/ApiRoute";
+import apiRoute from "@/routes/apiRoute";
 
 async function start() {
   console.log("Initializing DB");
