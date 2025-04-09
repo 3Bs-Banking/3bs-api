@@ -16,7 +16,10 @@ export class CustomerController extends BaseController<Customer> {
         phoneNumber: z.string().nullable().optional(),
         homeLatitude: z.number().nullable().optional(),
         homeLongitude: z.number().nullable().optional(),
-        preferredBranch: z.object({ id: z.string().uuid() }).nullable().optional()
+        preferredBranch: z
+          .object({ id: z.string().uuid() })
+          .nullable()
+          .optional()
       }) as unknown as ZodType<Partial<Customer>>
     });
   }

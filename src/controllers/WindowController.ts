@@ -1,7 +1,8 @@
 import { BaseController } from "@/core/BaseController";
 import { Window } from "@/models/Window";
+import { BranchService } from "@/services/BranchService";
 import { WindowService } from "@/services/WindowService";
-import { Service } from "typedi";
+import Container, { Service } from "typedi";
 import { z, ZodType } from "zod";
 
 @Service()
@@ -17,5 +18,15 @@ export class WindowController extends BaseController<Window> {
         branch: z.object({ id: z.string().uuid() })
       }) as unknown as ZodType<Partial<Window>>
     });
+  }
+
+  protected async validatePostBody(body: Request["body"]) {
+    const parsedBody = await super.validatePostBody(body);
+
+    const branchService = Container.get(BranchService);
+    const branch = await branchService.findById(parsedBody.branch!.id!);
+
+    if (!branch) throw new Error("Branch not found");
+    return parsedBody;
   }
 }

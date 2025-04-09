@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
-import { z, ZodType } from "zod";
+import { z, ZodError, ZodType } from "zod";
 import BaseService from "./BaseService";
-import { DeepPartial, ObjectLiteral } from "typeorm";
+import { DeepPartial, FindOptionsWhere, ObjectLiteral } from "typeorm";
 import Container from "typedi";
 
 /**
@@ -65,12 +65,22 @@ export abstract class BaseController<T extends ObjectLiteral> {
   }
 
   /**
+   * Applies a filter to the list query function.
+   * @param req - The request object.
+   * @returns FindOptionsWhere<T> instance to use in filter.
+   */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  protected async listFilter(req: Request): Promise<FindOptionsWhere<T>> {
+    return {};
+  }
+
+  /**
    * Handles the request to list all entities.
    * @param req - The request object.
    * @param res - The response object.
    */
   public async list(req: Request, res: Response): Promise<void> {
-    const entities = await this.service.findAll();
+    const entities = await this.service.find(await this.listFilter(req));
     res.json({ data: { [this.keyPlural]: entities } });
   }
 
@@ -98,19 +108,43 @@ export abstract class BaseController<T extends ObjectLiteral> {
   }
 
   /**
+   * Validates post body.
+   * Useful when having customized validation rules.
+   * @param body - The request body.
+   * @returns The parsed body
+   */
+  protected async validatePostBody(body: Request["body"]) {
+    return this.schema.parse(body);
+  }
+
+  /**
    * Handles the request to create a new entity.
    * @param req - The request object.
    * @param res - The response object.
    */
   public async post(req: Request, res: Response): Promise<void> {
-    const parsedBody = this.schema.safeParse(req.body);
-    if (!parsedBody.success) {
-      res.status(400).json({ error: { message: parsedBody.error.message } });
+    let parsedBody: DeepPartial<T>;
+
+    try {
+      parsedBody = await this.validatePostBody(req.body);
+    } catch (error) {
+      if (error instanceof ZodError) {
+        res.status(400).json({
+          error: {
+            message: "Invalid body",
+            issues: error.issues.map((i) => `${i.path}: ${i.message}`)
+          }
+        });
+        return;
+      } else if (error instanceof Error) {
+        res.status(400).json({ error: { message: error.message } });
+        return;
+      }
       return;
     }
 
     try {
-      const entity = await this.service.create(parsedBody.data);
+      const entity = await this.service.create(parsedBody);
       res.json({ data: { [this.keySingle]: entity } });
     } catch (error) {
       if (error instanceof Error) {
@@ -118,6 +152,16 @@ export abstract class BaseController<T extends ObjectLiteral> {
         res.status(500).json({ error: { message: "Internal server error" } });
       }
     }
+  }
+
+  /**
+   * Validates update body.
+   * Useful when having customized validation rules.
+   * @param body - The request body.
+   * @returns The parsed body
+   */
+  protected async validateUpdateBody(body: Request["body"]) {
+    return (this.updateSchema || this.schema).parse(body);
   }
 
   /**
@@ -133,14 +177,28 @@ export abstract class BaseController<T extends ObjectLiteral> {
       return;
     }
 
-    const parsedBody = (this.updateSchema || this.schema).safeParse(req.body);
-    if (!parsedBody.success) {
-      res.status(400).json({ error: { message: parsedBody.error.message } });
+    let parsedBody: DeepPartial<T>;
+
+    try {
+      parsedBody = await this.validateUpdateBody(req.body);
+    } catch (error) {
+      if (error instanceof ZodError) {
+        res.status(400).json({
+          error: {
+            message: "Invalid body",
+            issues: error.issues.map((i) => `${i.path}: ${i.message}`)
+          }
+        });
+        return;
+      } else if (error instanceof Error) {
+        res.status(400).json({ error: { message: error.message } });
+        return;
+      }
       return;
     }
 
     try {
-      const entity = await this.service.update(id, parsedBody.data);
+      const entity = await this.service.update(id, parsedBody);
       res.json({ data: { [this.keySingle]: entity } });
     } catch (error) {
       if (error instanceof Error) {

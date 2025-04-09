@@ -11,11 +11,9 @@ export class SettingController extends BaseController<Setting> {
       keySingle: "setting",
       keyPlural: "settings",
       schema: z.object({
-        maxAppointments: z.number().int().min(1, "Must be at least 1"),
-        workingHoursStart: z.string(),
-        workingHoursEnd: z.string(),
-        appointmentDurationMinutes: z.number().int().positive(),
-        window: z.object({ id: z.string().uuid() })
+        bank: z.object({ id: z.string().uuid() }),
+        key: z.string({ message: "Missing body parameter [key]" }),
+        value: z.string({ message: "Missing body parameter [value]" })
       }) as unknown as ZodType<Partial<Setting>>
     });
   }
