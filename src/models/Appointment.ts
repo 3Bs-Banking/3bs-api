@@ -1,4 +1,11 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from "typeorm";
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  ManyToOne,
+  CreateDateColumn,
+  UpdateDateColumn
+} from "typeorm";
 import { Branch } from "./Branch";
 import { Service } from "./Service";
 import { Customer } from "./Customer";
@@ -76,4 +83,10 @@ export class Appointment {
     onDelete: "SET NULL"
   })
   feedback!: Feedback | null;
+
+  @CreateDateColumn({ type: "timestamptz" })
+  createdAt!: Date;
+
+  @UpdateDateColumn({ type: "timestamptz" })
+  updatedAt!: Date;
 }

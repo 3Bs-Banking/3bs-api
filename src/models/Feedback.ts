@@ -1,4 +1,11 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from "typeorm";
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  ManyToOne,
+  CreateDateColumn,
+  UpdateDateColumn
+} from "typeorm";
 import { Appointment } from "./Appointment";
 import { Employee } from "./Employee";
 
@@ -25,4 +32,10 @@ export class Feedback {
     onDelete: "SET NULL"
   })
   employee!: Employee | null;
+
+  @CreateDateColumn({ type: "timestamptz" })
+  createdAt!: Date;
+
+  @UpdateDateColumn({ type: "timestamptz" })
+  updatedAt!: Date;
 }

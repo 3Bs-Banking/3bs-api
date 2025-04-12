@@ -1,4 +1,11 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from "typeorm";
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  OneToMany,
+  CreateDateColumn,
+  UpdateDateColumn
+} from "typeorm";
 import { Branch } from "./Branch";
 import { Service } from "./Service";
 import { Employee } from "./Employee";
@@ -31,4 +38,10 @@ export class Bank {
 
   @OneToMany(() => User, (user) => user.bank)
   users!: User[];
+
+  @CreateDateColumn({ type: "timestamptz" })
+  createdAt!: Date;
+
+  @UpdateDateColumn({ type: "timestamptz" })
+  updatedAt!: Date;
 }

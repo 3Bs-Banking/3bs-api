@@ -3,7 +3,9 @@ import {
   PrimaryGeneratedColumn,
   Column,
   ManyToOne,
-  OneToMany
+  OneToMany,
+  CreateDateColumn,
+  UpdateDateColumn
 } from "typeorm";
 import { Bank } from "./Bank";
 import { Branch } from "./Branch";
@@ -46,4 +48,10 @@ export class Employee {
 
   @OneToMany(() => Feedback, (feedback) => feedback.employee)
   feedbacks!: Feedback[];
+
+  @CreateDateColumn({ type: "timestamptz" })
+  createdAt!: Date;
+
+  @UpdateDateColumn({ type: "timestamptz" })
+  updatedAt!: Date;
 }
