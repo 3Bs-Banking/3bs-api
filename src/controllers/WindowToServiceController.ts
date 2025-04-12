@@ -16,7 +16,8 @@ export class WindowToServiceController extends BaseController<WindowToService> {
       schema: z.object({
         window: z.object({ id: z.string().uuid() }),
         service: z.object({ id: z.string().uuid() })
-      }) as unknown as ZodType<Partial<WindowToService>>
+      }) as unknown as ZodType<Partial<WindowToService>>,
+      relations: { window: true, service: true }
     });
   }
 

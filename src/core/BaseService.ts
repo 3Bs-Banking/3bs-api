@@ -37,19 +37,24 @@ export default abstract class BaseService<T extends ObjectLiteral> {
    * Finds an entity by its ID.
    *
    * @param {string} id - The ID of the entity to find.
+   * @param {FindOptionsRelations<T>} relations - Relations to include
    * @returns {Promise<T | null>} The found entity or `null` if not found.
    */
-  async findById(id: string): Promise<T | null> {
-    return await this.repository.findOne({ where: { id } as any });
+  async findById(
+    id: string,
+    relations?: FindOptionsRelations<T>
+  ): Promise<T | null> {
+    return await this.repository.findOne({ where: { id } as any, relations });
   }
 
   /**
    * Retrieves all entities of type `T`.
    *
+   * @param {FindOptionsRelations<T>} relations - Relations to include
    * @returns {Promise<T[]>} An array of all entities.
    */
-  async findAll(): Promise<T[]> {
-    return await this.repository.find();
+  async findAll(relations?: FindOptionsRelations<T>): Promise<T[]> {
+    return await this.repository.find({ relations });
   }
 
   /**

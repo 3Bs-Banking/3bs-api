@@ -27,7 +27,14 @@ export class AppointmentController extends BaseController<Appointment> {
         appointmentEndTime: z.string().nullable().optional(),
         status: z.nativeEnum(AppointmentStatus),
         reservationType: z.nativeEnum(ReservationType)
-      }) as unknown as ZodType<Partial<Appointment>>
+      }) as unknown as ZodType<Partial<Appointment>>,
+      relations: {
+        branch: true,
+        service: true,
+        customer: true,
+        window: true,
+        employee: true
+      }
     });
   }
 

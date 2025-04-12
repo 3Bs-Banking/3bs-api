@@ -18,7 +18,8 @@ export class FeedbackController extends BaseController<Feedback> {
         comment: z.string().nullable().optional(),
         appointment: z.object({ id: z.string().uuid() }),
         employee: z.object({ id: z.string().uuid() }).nullable().optional()
-      }) as unknown as ZodType<Partial<Feedback>>
+      }) as unknown as ZodType<Partial<Feedback>>,
+      relations: { appointment: true, employee: true }
     });
   }
 

@@ -14,7 +14,8 @@ export class SettingController extends BaseController<Setting> {
         bank: z.object({ id: z.string().uuid() }),
         key: z.string({ message: "Missing body parameter [key]" }),
         value: z.string({ message: "Missing body parameter [value]" })
-      }) as unknown as ZodType<Partial<Setting>>
+      }) as unknown as ZodType<Partial<Setting>>,
+      relations: { bank: true }
     });
   }
 }

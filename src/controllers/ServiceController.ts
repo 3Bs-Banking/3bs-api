@@ -17,7 +17,8 @@ export class ServiceController extends BaseController<ServiceEntity> {
         description: z.string().nullable().optional(),
         benchmarkTime: z.number().int().nullable().optional(),
         bank: z.object({ id: z.string().uuid() })
-      }) as unknown as ZodType<Partial<ServiceEntity>>
+      }) as unknown as ZodType<Partial<ServiceEntity>>,
+      relations: { bank: true }
     });
   }
 

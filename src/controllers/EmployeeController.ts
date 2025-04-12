@@ -23,7 +23,8 @@ export class EmployeeController extends BaseController<Employee> {
             .string({ message: "Missing body parameter [branch]" })
             .uuid({ message: "Invalid uuid" })
         })
-      }) as unknown as ZodType<Partial<Employee>>
+      }) as unknown as ZodType<Partial<Employee>>,
+      relations: { branch: true, bank: true }
     });
   }
 

@@ -28,7 +28,8 @@ export class BranchController extends BaseController<Branch> {
             .string({ message: "Missing body parameter [bank]" })
             .uuid({ message: "Invalid uuid" })
         })
-      }) as unknown as ZodType<Partial<Branch>>
+      }) as unknown as ZodType<Partial<Branch>>,
+      relations: { bank: true }
     });
   }
 

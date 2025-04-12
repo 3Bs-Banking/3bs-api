@@ -16,7 +16,8 @@ export class WindowController extends BaseController<Window> {
         type: z.string({ message: "Window type is required" }),
         status: z.string().optional(),
         branch: z.object({ id: z.string().uuid() })
-      }) as unknown as ZodType<Partial<Window>>
+      }) as unknown as ZodType<Partial<Window>>,
+      relations: { branch: true }
     });
   }
 

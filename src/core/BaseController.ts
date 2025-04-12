@@ -1,7 +1,12 @@
 import { Request, Response } from "express";
 import { z, ZodError, ZodType } from "zod";
 import BaseService from "./BaseService";
-import { DeepPartial, FindOptionsWhere, ObjectLiteral } from "typeorm";
+import {
+  DeepPartial,
+  FindOptionsRelations,
+  FindOptionsWhere,
+  ObjectLiteral
+} from "typeorm";
 import Container from "typedi";
 
 /**
@@ -9,10 +14,30 @@ import Container from "typedi";
  * @template T - The entity type.
  */
 export interface BaseControllerOptions<T extends ObjectLiteral> {
+  /**
+   * Name of entity in singular form.
+   */
   keySingle: string;
+
+  /**
+   * Name of entity in plural form.
+   */
   keyPlural: string;
+
+  /**
+   * Schema to use for post requests.
+   */
   schema: ZodType<DeepPartial<T>>;
+
+  /**
+   * Schema to use for update requests.
+   */
   updateSchema?: ZodType<DeepPartial<T>>;
+
+  /**
+   * Relations to include while querying db.
+   */
+  relations?: FindOptionsRelations<T>;
 }
 
 const uuidSchema = z.string().uuid();
@@ -26,6 +51,7 @@ export abstract class BaseController<T extends ObjectLiteral> {
   private keyPlural: string;
   private schema: ZodType<DeepPartial<T>>;
   private updateSchema?: ZodType<DeepPartial<T>>;
+  private relations?: FindOptionsRelations<T>;
 
   /**
    * Creates an instance of BaseController.
@@ -40,6 +66,7 @@ export abstract class BaseController<T extends ObjectLiteral> {
     this.keyPlural = options.keyPlural;
     this.schema = options.schema;
     this.updateSchema = options.updateSchema;
+    this.relations = options.relations;
   }
 
   /**
@@ -80,7 +107,10 @@ export abstract class BaseController<T extends ObjectLiteral> {
    * @param res - The response object.
    */
   public async list(req: Request, res: Response): Promise<void> {
-    const entities = await this.service.find(await this.listFilter(req));
+    const entities = await this.service.find(
+      await this.listFilter(req),
+      this.relations
+    );
     res.json({ data: { [this.keyPlural]: entities } });
   }
 
@@ -97,7 +127,7 @@ export abstract class BaseController<T extends ObjectLiteral> {
       return;
     }
 
-    const entity = await this.service.findById(id);
+    const entity = await this.service.findById(id, this.relations);
 
     if (!entity) {
       res.status(404).json({ error: { message: "Not found" } });
