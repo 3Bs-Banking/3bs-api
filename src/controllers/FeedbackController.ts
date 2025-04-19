@@ -1,9 +1,13 @@
 import { BaseController } from "@/core/BaseController";
 import { Feedback } from "@/models/Feedback";
+import { UserRole } from "@/models/User";
 import { AppointmentService } from "@/services/AppointmentService";
 import { EmployeeService } from "@/services/EmployeeService";
 import { FeedbackService } from "@/services/FeedbackService";
+import { UserService } from "@/services/UserService";
+import { Request } from "express";
 import Container, { Service } from "typedi";
+import { FindOptionsWhere } from "typeorm";
 import { z, ZodType } from "zod";
 
 @Service()
@@ -39,5 +43,21 @@ export class FeedbackController extends BaseController<Feedback> {
     }
 
     return parsedBody;
+  }
+
+  protected override async getScopedWhere(
+    req: Request
+  ): Promise<FindOptionsWhere<Feedback>> {
+    const user = (await Container.get(UserService).findById(req.user!.id, {
+      bank: true,
+      branch: true
+    }))!;
+
+    if (user.role === UserRole.ADMIN)
+      return { appointment: { bank: { id: user.bank.id } } };
+    else if (user.role === UserRole.MANAGER)
+      return { appointment: { branch: { id: user.branch.id } } };
+
+    return {};
   }
 }

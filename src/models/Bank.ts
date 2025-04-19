@@ -12,6 +12,7 @@ import { Employee } from "./Employee";
 import { Window } from "./Window";
 import { Setting } from "./Setting";
 import { User } from "./User";
+import { Appointment } from "./Appointment";
 
 @Entity()
 export class Bank {
@@ -23,6 +24,9 @@ export class Bank {
 
   @OneToMany(() => Branch, (branch) => branch.bank)
   branches!: Branch[];
+
+  @OneToMany(() => Appointment, (appointment) => appointment.bank)
+  appointments!: Appointment[];
 
   @OneToMany(() => Service, (service) => service.bank)
   services!: Service[];

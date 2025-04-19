@@ -92,12 +92,14 @@ export abstract class BaseController<T extends ObjectLiteral> {
   }
 
   /**
-   * Applies a filter to the list query function.
+   * Applies a filter to query functions.
    * @param req - The request object.
    * @returns FindOptionsWhere<T> instance to use in filter.
    */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  protected async listFilter(req: Request): Promise<FindOptionsWhere<T>> {
+  protected async getScopedWhere(
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    req: Request
+  ): Promise<FindOptionsWhere<T>> {
     return {};
   }
 
@@ -108,7 +110,7 @@ export abstract class BaseController<T extends ObjectLiteral> {
    */
   public async list(req: Request, res: Response): Promise<void> {
     const entities = await this.service.find(
-      await this.listFilter(req),
+      await this.getScopedWhere(req),
       this.relations
     );
     res.json({ data: { [this.keyPlural]: entities } });
@@ -127,7 +129,10 @@ export abstract class BaseController<T extends ObjectLiteral> {
       return;
     }
 
-    const entity = await this.service.findById(id, this.relations);
+    const entity = await this.service.findOne(
+      { ...(await this.getScopedWhere(req)), id },
+      this.relations
+    );
 
     if (!entity) {
       res.status(404).json({ error: { message: "Not found" } });
@@ -228,7 +233,15 @@ export abstract class BaseController<T extends ObjectLiteral> {
     }
 
     try {
-      const entity = await this.service.update(id, parsedBody);
+      let entity = await this.service.findOne({
+        ...(await this.getScopedWhere(req)),
+        id
+      });
+      if (!entity) {
+        res.status(404).json({ error: { message: "Not found" } });
+        return;
+      }
+      entity = await this.service.update(id, parsedBody);
       res.json({ data: { [this.keySingle]: entity } });
     } catch (error) {
       if (error instanceof Error) {
@@ -248,6 +261,15 @@ export abstract class BaseController<T extends ObjectLiteral> {
 
     if (!this.isValidUUID(id)) {
       res.status(400).json({ error: { message: "Invalid parameter ID" } });
+      return;
+    }
+
+    let entity = await this.service.findOne({
+      ...(await this.getScopedWhere(req)),
+      id
+    });
+    if (!entity) {
+      res.status(404).json({ error: { message: "Not found" } });
       return;
     }
 

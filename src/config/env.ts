@@ -10,7 +10,8 @@ const envVariables = z.object({
   DB_PASSWORD: z.string(),
   DB_NAME: z.string(),
   PORT: z.string(),
-  HOST: z.string()
+  HOST: z.string(),
+  SESSION_SECRET: z.string()
 });
 
 envVariables.parse(process.env);

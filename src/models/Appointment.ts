@@ -12,6 +12,7 @@ import { Customer } from "./Customer";
 import { Window } from "./Window";
 import { Employee } from "./Employee";
 import { Feedback } from "./Feedback";
+import { Bank } from "./Bank";
 
 export enum AppointmentStatus {
   PENDING = "Pending",
@@ -28,6 +29,11 @@ export enum ReservationType {
 export class Appointment {
   @PrimaryGeneratedColumn("uuid")
   id!: string;
+
+  @ManyToOne(() => Bank, (bank) => bank.appointments, {
+    onDelete: "CASCADE"
+  })
+  bank!: Bank;
 
   @ManyToOne(() => Branch, (branch) => branch.appointments, {
     onDelete: "CASCADE"

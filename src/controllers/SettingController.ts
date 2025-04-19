@@ -1,7 +1,10 @@
 import { BaseController } from "@/core/BaseController";
 import { Setting } from "@/models/Setting";
 import { SettingService } from "@/services/SettingService";
-import { Service } from "typedi";
+import { UserService } from "@/services/UserService";
+import { Request } from "express";
+import Container, { Service } from "typedi";
+import { FindOptionsWhere } from "typeorm";
 import { z, ZodType } from "zod";
 
 @Service()
@@ -17,5 +20,16 @@ export class SettingController extends BaseController<Setting> {
       }) as unknown as ZodType<Partial<Setting>>,
       relations: { bank: true }
     });
+  }
+
+  protected override async getScopedWhere(
+    req: Request
+  ): Promise<FindOptionsWhere<Setting>> {
+    const user = (await Container.get(UserService).findById(req.user!.id, {
+      bank: true,
+      branch: true
+    }))!;
+
+    return { bank: { id: user.bank.id } };
   }
 }
