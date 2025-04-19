@@ -13,6 +13,7 @@ export const register = async (req: Request, res: Response) => {
       branch: string;
     }
   > = z.object({
+    fullName: z.string({ message: "Missing body parameter [fullName]" }),
     email: z
       .string({ message: "Missing body parameter [email]" })
       .email("Invalid email"),
@@ -24,7 +25,12 @@ export const register = async (req: Request, res: Response) => {
 
   const parsedBody = schema.safeParse(req.body);
   if (!parsedBody.success) {
-    res.status(400).json({ error: { message: parsedBody.error.message } });
+    res.status(400).json({
+      error: {
+        message: "Invalid body",
+        issues: parsedBody.error.issues.map((i) => `${i.path}: ${i.message}`)
+      }
+    });
     return;
   }
 

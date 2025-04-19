@@ -8,6 +8,10 @@ import { BranchService } from "@/services/BranchService";
 import { ServiceService } from "@/services/Service";
 import { CustomerService } from "@/services/CustomerService";
 import { EmployeeService } from "@/services/EmployeeService";
+import { Request } from "express";
+import { FindOptionsWhere } from "typeorm";
+import { UserService } from "@/services/UserService";
+import { UserRole } from "@/models/User";
 
 @Service()
 export class AppointmentController extends BaseController<Appointment> {
@@ -69,5 +73,20 @@ export class AppointmentController extends BaseController<Appointment> {
     }
 
     return parsedBody;
+  }
+
+  protected override async getScopedWhere(
+    req: Request
+  ): Promise<FindOptionsWhere<Appointment>> {
+    const user = (await Container.get(UserService).findById(req.user!.id, {
+      bank: true,
+      branch: true
+    }))!;
+
+    if (user.role === UserRole.ADMIN) return { bank: { id: user.bank.id } };
+    else if (user.role === UserRole.MANAGER)
+      return { branch: { id: user.branch.id } };
+
+    return {};
   }
 }

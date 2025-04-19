@@ -25,6 +25,20 @@ export const isAdmin = async (
   res.status(401).json({ error: { message: "Unauthorized" } });
 };
 
+export const isManager = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  if (req.isAuthenticated()) {
+    const userService = Container.get(UserService);
+    const user = (await userService.findById(req.user.id))!;
+    if (user.role === UserRole.MANAGER || user.role === UserRole.ADMIN)
+      return next();
+  }
+  res.status(401).json({ error: { message: "Unauthorized" } });
+};
+
 declare global {
   namespace Express {
     interface User {

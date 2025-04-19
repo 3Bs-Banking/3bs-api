@@ -772,6 +772,13 @@
     "@types/range-parser" "*"
     "@types/send" "*"
 
+"@types/express-session@^1.18.1":
+  version "1.18.1"
+  resolved "https://registry.yarnpkg.com/@types/express-session/-/express-session-1.18.1.tgz#67c629a34b60a63a4724f359aac0c0e6d1f15365"
+  integrity sha512-S6TkD/lljxDlQ2u/4A70luD8/ZxZcrU5pQwI1rVXCiaVIywoFgbA+PIUNDjPhQpPdK0dGleLtYc/y7XWBfclBg==
+  dependencies:
+    "@types/express" "*"
+
 "@types/express@*":
   version "5.0.1"
   resolved "https://registry.yarnpkg.com/@types/express/-/express-5.0.1.tgz#138d741c6e5db8cc273bec5285cd6e9d0779fc9f"
@@ -3874,6 +3881,11 @@ typeorm-naming-strategies@^4.1.0:
   version "4.1.0"
   resolved "https://registry.yarnpkg.com/typeorm-naming-strategies/-/typeorm-naming-strategies-4.1.0.tgz#1ec6eb296c8d7b69bb06764d5b9083ff80e814a9"
   integrity sha512-vPekJXzZOTZrdDvTl1YoM+w+sUIfQHG4kZTpbFYoTsufyv9NIBRe4Q+PdzhEAFA2std3D9LZHEb1EjE9zhRpiQ==
+
+typeorm-store@^2.0.1:
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/typeorm-store/-/typeorm-store-2.0.1.tgz#c7ae126c9f055f9b4f3e25749e07b97347a9ab52"
+  integrity sha512-GAWfICUOIS9QGNiHrf9z6snnorr4gAY0uqK31EE1DmGxLMHZTh6m48FpoY4Bs0n+0ti769E1vmtgnlNUVqlVdQ==
 
 typeorm@^0.3.21:
   version "0.3.21"

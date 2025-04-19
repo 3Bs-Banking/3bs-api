@@ -12,6 +12,7 @@ import { Feedback } from "../models/Feedback";
 import { Setting } from "../models/Setting";
 import { User } from "../models/User";
 import { SnakeNamingStrategy } from "typeorm-naming-strategies";
+import { Session } from "@/models/Session";
 
 export const AppDataSource = new DataSource({
   type: "postgres",
@@ -35,6 +36,7 @@ export const AppDataSource = new DataSource({
     Appointment,
     Feedback,
     Setting,
+    Session,
     User
   ],
   migrations: [],

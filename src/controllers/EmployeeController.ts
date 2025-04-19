@@ -1,8 +1,12 @@
 import { BaseController } from "@/core/BaseController";
 import { Employee } from "@/models/Employee";
+import { UserRole } from "@/models/User";
 import { BranchService } from "@/services/BranchService";
 import { EmployeeService } from "@/services/EmployeeService";
+import { UserService } from "@/services/UserService";
+import { Request } from "express";
 import Container, { Service } from "typedi";
+import { FindOptionsWhere } from "typeorm";
 import { z, ZodType } from "zod";
 
 @Service()
@@ -48,5 +52,20 @@ export class EmployeeController extends BaseController<Employee> {
     parsedBody.bank = branch.bank;
 
     return parsedBody;
+  }
+
+  protected override async getScopedWhere(
+    req: Request
+  ): Promise<FindOptionsWhere<Employee>> {
+    const user = (await Container.get(UserService).findById(req.user!.id, {
+      bank: true,
+      branch: true
+    }))!;
+
+    if (user.role === UserRole.ADMIN) return { bank: { id: user.bank.id } };
+    else if (user.role === UserRole.MANAGER)
+      return { branch: { id: user.branch.id } };
+
+    return {};
   }
 }

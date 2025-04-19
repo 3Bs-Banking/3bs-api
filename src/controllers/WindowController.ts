@@ -1,8 +1,12 @@
 import { BaseController } from "@/core/BaseController";
+import { UserRole } from "@/models/User";
 import { Window } from "@/models/Window";
 import { BranchService } from "@/services/BranchService";
+import { UserService } from "@/services/UserService";
 import { WindowService } from "@/services/WindowService";
+import { Request } from "express";
 import Container, { Service } from "typedi";
+import { FindOptionsWhere } from "typeorm";
 import { z, ZodType } from "zod";
 
 @Service()
@@ -29,5 +33,20 @@ export class WindowController extends BaseController<Window> {
 
     if (!branch) throw new Error("Branch not found");
     return parsedBody;
+  }
+
+  protected override async getScopedWhere(
+    req: Request
+  ): Promise<FindOptionsWhere<Window>> {
+    const user = (await Container.get(UserService).findById(req.user!.id, {
+      bank: true,
+      branch: true
+    }))!;
+
+    if (user.role === UserRole.ADMIN) return { bank: { id: user.bank.id } };
+    else if (user.role === UserRole.MANAGER)
+      return { branch: { id: user.branch.id } };
+
+    return {};
   }
 }
