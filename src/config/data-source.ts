@@ -11,6 +11,7 @@ import { Appointment } from "../models/Appointment";
 import { Feedback } from "../models/Feedback";
 import { Setting } from "../models/Setting";
 import { User } from "../models/User";
+import { FraudPrediction } from "@/models/FraudPrediction";
 import { SnakeNamingStrategy } from "typeorm-naming-strategies";
 
 export const AppDataSource = new DataSource({
@@ -35,7 +36,8 @@ export const AppDataSource = new DataSource({
     Appointment,
     Feedback,
     Setting,
-    User
+    User,
+    FraudPrediction
   ],
   migrations: [],
   subscribers: [],

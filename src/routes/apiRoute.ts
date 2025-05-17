@@ -10,6 +10,7 @@ import ServiceRoute from "@/routes/ServiceRoute";
 import SettingRoute from "@/routes/SettingRoute";
 import WindowRoute from "@/routes/WindowRoute";
 import WindowToServiceRoute from "@/routes/WindowToServiceRoute";
+import FraudPredictionRoute from "@/routes/FraudPredictionRoute";
 
 const app = Router();
 
@@ -24,5 +25,5 @@ app.use("/service", ServiceRoute);
 app.use("/setting", SettingRoute);
 app.use("/window", WindowRoute);
 app.use("/window-to-service", WindowToServiceRoute);
-
+app.use("/fraud-predictions", FraudPredictionRoute);
 export default app;

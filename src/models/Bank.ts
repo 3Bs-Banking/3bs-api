@@ -5,6 +5,7 @@ import { Employee } from "./Employee";
 import { Window } from "./Window";
 import { Setting } from "./Setting";
 import { User } from "./User";
+import { FraudPrediction } from "./FraudPrediction";
 
 @Entity()
 export class Bank {
@@ -31,4 +32,6 @@ export class Bank {
 
   @OneToMany(() => User, (user) => user.bank)
   users!: User[];
+  @OneToMany(() => FraudPrediction, (fp) => fp.bank)
+  fraudPredictions!: FraudPrediction[];
 }

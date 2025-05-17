@@ -28,7 +28,8 @@ export class FraudPredictionController extends BaseController<FraudPrediction> {
           month: z.number(),
           year: z.number(),
           age: z.number()
-        })
+        }),
+        bankId: z.string()
       })
     });
   }
