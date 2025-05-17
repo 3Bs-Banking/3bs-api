@@ -13,6 +13,7 @@ import { Setting } from "../models/Setting";
 import { User } from "../models/User";
 import { FraudPrediction } from "@/models/FraudPrediction";
 import { SnakeNamingStrategy } from "typeorm-naming-strategies";
+import { ChurnPrediction } from "@/models/ChurnPrediction";
 
 export const AppDataSource = new DataSource({
   type: "postgres",
@@ -37,7 +38,8 @@ export const AppDataSource = new DataSource({
     Feedback,
     Setting,
     User,
-    FraudPrediction
+    FraudPrediction,
+    ChurnPrediction
   ],
   migrations: [],
   subscribers: [],

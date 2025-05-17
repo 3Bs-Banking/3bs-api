@@ -11,6 +11,7 @@ import SettingRoute from "@/routes/SettingRoute";
 import WindowRoute from "@/routes/WindowRoute";
 import WindowToServiceRoute from "@/routes/WindowToServiceRoute";
 import FraudPredictionRoute from "@/routes/FraudPredictionRoute";
+import ChurnPredictionRoute from "@/routes/ChurnPredictionRoute";
 
 const app = Router();
 
@@ -26,4 +27,5 @@ app.use("/setting", SettingRoute);
 app.use("/window", WindowRoute);
 app.use("/window-to-service", WindowToServiceRoute);
 app.use("/fraud-predictions", FraudPredictionRoute);
+app.use("/churn-predictions", ChurnPredictionRoute);
 export default app;
