@@ -96,6 +96,11 @@ export default abstract class BaseService<T extends ObjectLiteral> {
     return await this.repository.save(entity);
   }
 
+  async createBatch(data: DeepPartial<T>[]): Promise<T[]> {
+    const entities = this.repository.create(data);
+    return await this.repository.save(entities);
+  }
+
   /**
    * Updates an existing entity by ID.
    *

@@ -34,7 +34,7 @@ export class Employee {
   @Column({ type: "varchar", length: 255, unique: true })
   email!: string;
 
-  @Column({ type: "varchar", length: 20, nullable: true })
+  @Column({ type: "varchar", length: 30, nullable: true })
   phoneNumber!: string | null;
 
   @Column({ type: "integer", nullable: true })
