@@ -11,6 +11,7 @@ import ServiceRoute from "@/routes/ServiceRoute";
 import SettingRoute from "@/routes/SettingRoute";
 import WindowRoute from "@/routes/WindowRoute";
 import WindowToServiceRoute from "@/routes/WindowToServiceRoute";
+import FraudPredictionRoute from "@/routes/FraudPredictionRoute";
 import { isAuthenticated } from "@/middleware/AuthMiddleware";
 
 const app = Router();
@@ -27,5 +28,6 @@ app.use("/service", isAuthenticated, ServiceRoute);
 app.use("/setting", isAuthenticated, SettingRoute);
 app.use("/window", isAuthenticated, WindowRoute);
 app.use("/window-to-service", isAuthenticated, WindowToServiceRoute);
+app.use("/window-to-service", isAuthenticated, FraudPredictionRoute);
 
 export default app;
