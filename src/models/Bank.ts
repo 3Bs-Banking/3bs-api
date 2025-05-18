@@ -13,6 +13,7 @@ import { Window } from "./Window";
 import { Setting } from "./Setting";
 import { User } from "./User";
 import { Appointment } from "./Appointment";
+import { FraudPrediction } from "./FraudPrediction";
 
 @Entity()
 export class Bank {
@@ -42,6 +43,9 @@ export class Bank {
 
   @OneToMany(() => User, (user) => user.bank)
   users!: User[];
+
+  @OneToMany(() => FraudPrediction, (fp) => fp.bank)
+  fraudPredictions!: FraudPrediction[];
 
   @CreateDateColumn({ type: "timestamptz" })
   createdAt!: Date;
