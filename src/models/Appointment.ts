@@ -1,10 +1,18 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from "typeorm";
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  ManyToOne,
+  CreateDateColumn,
+  UpdateDateColumn
+} from "typeorm";
 import { Branch } from "./Branch";
 import { Service } from "./Service";
 import { Customer } from "./Customer";
 import { Window } from "./Window";
 import { Employee } from "./Employee";
 import { Feedback } from "./Feedback";
+import { Bank } from "./Bank";
 
 export enum AppointmentStatus {
   PENDING = "Pending",
@@ -21,6 +29,11 @@ export enum ReservationType {
 export class Appointment {
   @PrimaryGeneratedColumn("uuid")
   id!: string;
+
+  @ManyToOne(() => Bank, (bank) => bank.appointments, {
+    onDelete: "CASCADE"
+  })
+  bank!: Bank;
 
   @ManyToOne(() => Branch, (branch) => branch.appointments, {
     onDelete: "CASCADE"
@@ -76,4 +89,10 @@ export class Appointment {
     onDelete: "SET NULL"
   })
   feedback!: Feedback | null;
+
+  @CreateDateColumn({ type: "timestamptz" })
+  createdAt!: Date;
+
+  @UpdateDateColumn({ type: "timestamptz" })
+  updatedAt!: Date;
 }

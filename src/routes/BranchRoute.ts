@@ -6,9 +6,9 @@ const app = Router();
 const branchController = Container.get(BranchController);
 
 app.get("/", (req, res) => branchController.list(req, res));
-app.get("/:id", (req, res) => branchController.getId(req, res));
+app.get("/:branch", (req, res) => branchController.getId(req, res));
 app.post("/", (req, res) => branchController.post(req, res));
-app.patch("/:id", (req, res) => branchController.update(req, res));
-app.delete("/:id", (req, res) => branchController.delete(req, res));
+app.patch("/:branch", (req, res) => branchController.update(req, res));
+app.delete("/:branch", (req, res) => branchController.delete(req, res));
 
 export default app;

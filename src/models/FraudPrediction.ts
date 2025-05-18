@@ -5,6 +5,7 @@ import {
   CreateDateColumn,
   ManyToOne,
   JoinColumn,
+  UpdateDateColumn
 } from "typeorm";
 import { Bank } from "@/models/Bank";
 
@@ -28,4 +29,7 @@ export class FraudPrediction {
 
   @CreateDateColumn()
   createdAt!: Date;
+
+  @UpdateDateColumn({ type: "timestamptz" })
+  updatedAt!: Date;
 }

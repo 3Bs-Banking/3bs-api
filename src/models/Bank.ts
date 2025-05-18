@@ -1,10 +1,18 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from "typeorm";
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  OneToMany,
+  CreateDateColumn,
+  UpdateDateColumn
+} from "typeorm";
 import { Branch } from "./Branch";
 import { Service } from "./Service";
 import { Employee } from "./Employee";
 import { Window } from "./Window";
 import { Setting } from "./Setting";
 import { User } from "./User";
+import { Appointment } from "./Appointment";
 import { FraudPrediction } from "./FraudPrediction";
 
 @Entity()
@@ -17,6 +25,9 @@ export class Bank {
 
   @OneToMany(() => Branch, (branch) => branch.bank)
   branches!: Branch[];
+
+  @OneToMany(() => Appointment, (appointment) => appointment.bank)
+  appointments!: Appointment[];
 
   @OneToMany(() => Service, (service) => service.bank)
   services!: Service[];
@@ -32,6 +43,13 @@ export class Bank {
 
   @OneToMany(() => User, (user) => user.bank)
   users!: User[];
+
   @OneToMany(() => FraudPrediction, (fp) => fp.bank)
   fraudPredictions!: FraudPrediction[];
+
+  @CreateDateColumn({ type: "timestamptz" })
+  createdAt!: Date;
+
+  @UpdateDateColumn({ type: "timestamptz" })
+  updatedAt!: Date;
 }
