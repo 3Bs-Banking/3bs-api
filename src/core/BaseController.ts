@@ -1,7 +1,12 @@
 import { Request, Response } from "express";
-import { z, ZodType } from "zod";
+import { z, ZodError, ZodType } from "zod";
 import BaseService from "./BaseService";
-import { DeepPartial, ObjectLiteral } from "typeorm";
+import {
+  DeepPartial,
+  FindOptionsRelations,
+  FindOptionsWhere,
+  ObjectLiteral
+} from "typeorm";
 import Container from "typedi";
 
 /**
@@ -9,10 +14,30 @@ import Container from "typedi";
  * @template T - The entity type.
  */
 export interface BaseControllerOptions<T extends ObjectLiteral> {
+  /**
+   * Name of entity in singular form.
+   */
   keySingle: string;
+
+  /**
+   * Name of entity in plural form.
+   */
   keyPlural: string;
+
+  /**
+   * Schema to use for post requests.
+   */
   schema: ZodType<DeepPartial<T>>;
+
+  /**
+   * Schema to use for update requests.
+   */
   updateSchema?: ZodType<DeepPartial<T>>;
+
+  /**
+   * Relations to include while querying db.
+   */
+  relations?: FindOptionsRelations<T>;
 }
 
 const uuidSchema = z.string().uuid();
@@ -26,6 +51,7 @@ export abstract class BaseController<T extends ObjectLiteral> {
   private keyPlural: string;
   private schema: ZodType<DeepPartial<T>>;
   private updateSchema?: ZodType<DeepPartial<T>>;
+  private relations?: FindOptionsRelations<T>;
 
   /**
    * Creates an instance of BaseController.
@@ -40,6 +66,7 @@ export abstract class BaseController<T extends ObjectLiteral> {
     this.keyPlural = options.keyPlural;
     this.schema = options.schema;
     this.updateSchema = options.updateSchema;
+    this.relations = options.relations;
   }
 
   /**
@@ -65,12 +92,27 @@ export abstract class BaseController<T extends ObjectLiteral> {
   }
 
   /**
+   * Applies a filter to query functions.
+   * @param req - The request object.
+   * @returns FindOptionsWhere<T> instance to use in filter.
+   */
+  protected async getScopedWhere(
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    req: Request
+  ): Promise<FindOptionsWhere<T>> {
+    return {};
+  }
+
+  /**
    * Handles the request to list all entities.
    * @param req - The request object.
    * @param res - The response object.
    */
   public async list(req: Request, res: Response): Promise<void> {
-    const entities = await this.service.findAll();
+    const entities = await this.service.find(
+      await this.getScopedWhere(req),
+      this.relations
+    );
     res.json({ data: { [this.keyPlural]: entities } });
   }
 
@@ -87,7 +129,10 @@ export abstract class BaseController<T extends ObjectLiteral> {
       return;
     }
 
-    const entity = await this.service.findById(id);
+    const entity = await this.service.findOne(
+      { ...(await this.getScopedWhere(req)), id },
+      this.relations
+    );
 
     if (!entity) {
       res.status(404).json({ error: { message: "Not found" } });
@@ -98,19 +143,43 @@ export abstract class BaseController<T extends ObjectLiteral> {
   }
 
   /**
+   * Validates post body.
+   * Useful when having customized validation rules.
+   * @param body - The request body.
+   * @returns The parsed body
+   */
+  protected async validatePostBody(body: Request["body"]) {
+    return this.schema.parse(body);
+  }
+
+  /**
    * Handles the request to create a new entity.
    * @param req - The request object.
    * @param res - The response object.
    */
   public async post(req: Request, res: Response): Promise<void> {
-    const parsedBody = this.schema.safeParse(req.body);
-    if (!parsedBody.success) {
-      res.status(400).json({ error: { message: parsedBody.error.message } });
+    let parsedBody: DeepPartial<T>;
+
+    try {
+      parsedBody = await this.validatePostBody(req.body);
+    } catch (error) {
+      if (error instanceof ZodError) {
+        res.status(400).json({
+          error: {
+            message: "Invalid body",
+            issues: error.issues.map((i) => `${i.path}: ${i.message}`)
+          }
+        });
+        return;
+      } else if (error instanceof Error) {
+        res.status(400).json({ error: { message: error.message } });
+        return;
+      }
       return;
     }
 
     try {
-      const entity = await this.service.create(parsedBody.data);
+      const entity = await this.service.create(parsedBody);
       res.json({ data: { [this.keySingle]: entity } });
     } catch (error) {
       if (error instanceof Error) {
@@ -118,6 +187,16 @@ export abstract class BaseController<T extends ObjectLiteral> {
         res.status(500).json({ error: { message: "Internal server error" } });
       }
     }
+  }
+
+  /**
+   * Validates update body.
+   * Useful when having customized validation rules.
+   * @param body - The request body.
+   * @returns The parsed body
+   */
+  protected async validateUpdateBody(body: Request["body"]) {
+    return (this.updateSchema || this.schema).parse(body);
   }
 
   /**
@@ -133,14 +212,36 @@ export abstract class BaseController<T extends ObjectLiteral> {
       return;
     }
 
-    const parsedBody = (this.updateSchema || this.schema).safeParse(req.body);
-    if (!parsedBody.success) {
-      res.status(400).json({ error: { message: parsedBody.error.message } });
+    let parsedBody: DeepPartial<T>;
+
+    try {
+      parsedBody = await this.validateUpdateBody(req.body);
+    } catch (error) {
+      if (error instanceof ZodError) {
+        res.status(400).json({
+          error: {
+            message: "Invalid body",
+            issues: error.issues.map((i) => `${i.path}: ${i.message}`)
+          }
+        });
+        return;
+      } else if (error instanceof Error) {
+        res.status(400).json({ error: { message: error.message } });
+        return;
+      }
       return;
     }
 
     try {
-      const entity = await this.service.update(id, parsedBody.data);
+      let entity = await this.service.findOne({
+        ...(await this.getScopedWhere(req)),
+        id
+      });
+      if (!entity) {
+        res.status(404).json({ error: { message: "Not found" } });
+        return;
+      }
+      entity = await this.service.update(id, parsedBody);
       res.json({ data: { [this.keySingle]: entity } });
     } catch (error) {
       if (error instanceof Error) {
@@ -160,6 +261,15 @@ export abstract class BaseController<T extends ObjectLiteral> {
 
     if (!this.isValidUUID(id)) {
       res.status(400).json({ error: { message: "Invalid parameter ID" } });
+      return;
+    }
+
+    let entity = await this.service.findOne({
+      ...(await this.getScopedWhere(req)),
+      id
+    });
+    if (!entity) {
+      res.status(404).json({ error: { message: "Not found" } });
       return;
     }
 

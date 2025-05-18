@@ -3,7 +3,9 @@ import {
   PrimaryGeneratedColumn,
   Column,
   ManyToOne,
-  OneToMany
+  OneToMany,
+  CreateDateColumn,
+  UpdateDateColumn
 } from "typeorm";
 import { Bank } from "./Bank";
 import { Branch } from "./Branch";
@@ -32,7 +34,7 @@ export class Employee {
   @Column({ type: "varchar", length: 255, unique: true })
   email!: string;
 
-  @Column({ type: "varchar", length: 20, nullable: true })
+  @Column({ type: "varchar", length: 30, nullable: true })
   phoneNumber!: string | null;
 
   @Column({ type: "integer", nullable: true })
@@ -46,4 +48,10 @@ export class Employee {
 
   @OneToMany(() => Feedback, (feedback) => feedback.employee)
   feedbacks!: Feedback[];
+
+  @CreateDateColumn({ type: "timestamptz" })
+  createdAt!: Date;
+
+  @UpdateDateColumn({ type: "timestamptz" })
+  updatedAt!: Date;
 }

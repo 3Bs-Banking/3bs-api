@@ -3,7 +3,9 @@ import {
   PrimaryGeneratedColumn,
   Column,
   ManyToOne,
-  OneToMany
+  OneToMany,
+  CreateDateColumn,
+  UpdateDateColumn
 } from "typeorm";
 import { Bank } from "./Bank";
 import { Branch } from "./Branch";
@@ -35,4 +37,10 @@ export class Window {
 
   @OneToMany(() => Appointment, (appointment) => appointment.window)
   appointments!: Appointment[];
+
+  @CreateDateColumn({ type: "timestamptz" })
+  createdAt!: Date;
+
+  @UpdateDateColumn({ type: "timestamptz" })
+  updatedAt!: Date;
 }

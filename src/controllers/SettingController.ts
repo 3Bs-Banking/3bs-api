@@ -1,7 +1,10 @@
 import { BaseController } from "@/core/BaseController";
 import { Setting } from "@/models/Setting";
 import { SettingService } from "@/services/SettingService";
-import { Service } from "typedi";
+import { UserService } from "@/services/UserService";
+import { Request } from "express";
+import Container, { Service } from "typedi";
+import { FindOptionsWhere } from "typeorm";
 import { z, ZodType } from "zod";
 
 @Service()
@@ -11,12 +14,22 @@ export class SettingController extends BaseController<Setting> {
       keySingle: "setting",
       keyPlural: "settings",
       schema: z.object({
-        maxAppointments: z.number().int().min(1, "Must be at least 1"),
-        workingHoursStart: z.string(),
-        workingHoursEnd: z.string(),
-        appointmentDurationMinutes: z.number().int().positive(),
-        window: z.object({ id: z.string().uuid() })
-      }) as unknown as ZodType<Partial<Setting>>
+        bank: z.object({ id: z.string().uuid() }),
+        key: z.string({ message: "Missing body parameter [key]" }),
+        value: z.string({ message: "Missing body parameter [value]" })
+      }) as unknown as ZodType<Partial<Setting>>,
+      relations: { bank: true }
     });
+  }
+
+  protected override async getScopedWhere(
+    req: Request
+  ): Promise<FindOptionsWhere<Setting>> {
+    const user = (await Container.get(UserService).findById(req.user!.id, {
+      bank: true,
+      branch: true
+    }))!;
+
+    return { bank: { id: user.bank.id } };
   }
 }

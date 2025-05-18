@@ -5,7 +5,8 @@ import {
   DeepPartial,
   EntityTarget,
   ObjectLiteral,
-  FindOptionsWhere
+  FindOptionsWhere,
+  FindOptionsRelations
 } from "typeorm";
 
 /**
@@ -36,29 +37,52 @@ export default abstract class BaseService<T extends ObjectLiteral> {
    * Finds an entity by its ID.
    *
    * @param {string} id - The ID of the entity to find.
+   * @param {FindOptionsRelations<T>} relations - Relations to include
    * @returns {Promise<T | null>} The found entity or `null` if not found.
    */
-  async findById(id: string): Promise<T | null> {
-    return await this.repository.findOne({ where: { id } as any });
+  async findById(
+    id: string,
+    relations?: FindOptionsRelations<T>
+  ): Promise<T | null> {
+    return await this.repository.findOne({ where: { id } as any, relations });
   }
 
   /**
    * Retrieves all entities of type `T`.
    *
+   * @param {FindOptionsRelations<T>} relations - Relations to include
    * @returns {Promise<T[]>} An array of all entities.
    */
-  async findAll(): Promise<T[]> {
-    return await this.repository.find();
+  async findAll(relations?: FindOptionsRelations<T>): Promise<T[]> {
+    return await this.repository.find({ relations });
   }
 
   /**
    * Finds entities matching the given options.
    *
    * @param {FindOptionsWhere<T>} options - The search criteria.
+   * @param {FindOptionsRelations<T>} relations - Relations to include
    * @returns {Promise<T[]>} An array of matching entities.
    */
-  async find(options: FindOptionsWhere<T>): Promise<T[]> {
-    return await this.repository.find({ where: options });
+  async find(
+    options: FindOptionsWhere<T>,
+    relations?: FindOptionsRelations<T>
+  ): Promise<T[]> {
+    return await this.repository.find({ where: options, relations });
+  }
+
+  /**
+   * Finds entities matching the given options.
+   *
+   * @param {FindOptionsWhere<T>} options - The search criteria.
+   * @param {FindOptionsRelations<T>} relations - Relations to include
+   * @returns {Promise<T[]>} An array of matching entities.
+   */
+  async findOne(
+    options: FindOptionsWhere<T>,
+    relations?: FindOptionsRelations<T>
+  ): Promise<T | null> {
+    return await this.repository.findOne({ where: options, relations });
   }
 
   /**
@@ -70,6 +94,11 @@ export default abstract class BaseService<T extends ObjectLiteral> {
   async create(data: DeepPartial<T>): Promise<T> {
     const entity = this.repository.create(data);
     return await this.repository.save(entity);
+  }
+
+  async createBatch(data: DeepPartial<T>[]): Promise<T[]> {
+    const entities = this.repository.create(data);
+    return await this.repository.save(entities);
   }
 
   /**

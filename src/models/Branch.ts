@@ -3,7 +3,9 @@ import {
   PrimaryGeneratedColumn,
   Column,
   ManyToOne,
-  OneToMany
+  OneToMany,
+  CreateDateColumn,
+  UpdateDateColumn
 } from "typeorm";
 import { Bank } from "./Bank";
 import { Customer } from "./Customer";
@@ -35,7 +37,7 @@ export class Branch {
   @Column("varchar", { length: 20, nullable: true })
   zipCode!: string | null;
 
-  @Column("varchar", { length: 20, nullable: true })
+  @Column("varchar", { length: 30, nullable: true })
   contactNumber!: string | null;
 
   @Column("float", { nullable: true })
@@ -64,4 +66,10 @@ export class Branch {
 
   @OneToMany(() => User, (user) => user.branch)
   users!: User[];
+
+  @CreateDateColumn({ type: "timestamptz" })
+  createdAt!: Date;
+
+  @UpdateDateColumn({ type: "timestamptz" })
+  updatedAt!: Date;
 }
