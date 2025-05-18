@@ -13,21 +13,23 @@ import WindowRoute from "@/routes/WindowRoute";
 import WindowToServiceRoute from "@/routes/WindowToServiceRoute";
 import FraudPredictionRoute from "@/routes/FraudPredictionRoute";
 import ChurnPredictionRoute from "@/routes/ChurnPredictionRoute";
+import { isAuthenticated } from "@/middleware/AuthMiddleware";
 
 const app = Router();
 
-app.use("/bank", BankRoute);
-app.use("/user", UserRoute);
-app.use("/appointment", AppointmentRoute);
-app.use("/branch", BranchRoute);
-app.use("/customer", CustomerRoute);
-app.use("/employee", EmployeeRoute);
-app.use("/feedback", FeedbackRoute);
-app.use("/service", ServiceRoute);
-app.use("/setting", SettingRoute);
-app.use("/window", WindowRoute);
-app.use("/window-to-service", WindowToServiceRoute);
-app.use("/fraud-predictions", FraudPredictionRoute);
-app.use("/churn-predictions", ChurnPredictionRoute);
+app.use("/auth", AuthRoute);
+app.use("/bank", isAuthenticated, BankRoute);
+app.use("/user", isAuthenticated, UserRoute);
+app.use("/appointment", isAuthenticated, AppointmentRoute);
+app.use("/branch", isAuthenticated, BranchRoute);
+app.use("/customer", isAuthenticated, CustomerRoute);
+app.use("/employee", isAuthenticated, EmployeeRoute);
+app.use("/feedback", isAuthenticated, FeedbackRoute);
+app.use("/service", isAuthenticated, ServiceRoute);
+app.use("/setting", isAuthenticated, SettingRoute);
+app.use("/window", isAuthenticated, WindowRoute);
+app.use("/window-to-service", isAuthenticated, WindowToServiceRoute);
+app.use("/fraud-predictions", isAuthenticated, FraudPredictionRoute);
+app.use("/churn-predictions", isAuthenticated, ChurnPredictionRoute);
 
 export default app;
