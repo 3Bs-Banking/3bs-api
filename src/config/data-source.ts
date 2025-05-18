@@ -13,6 +13,7 @@ import { Setting } from "../models/Setting";
 import { User } from "../models/User";
 import { FraudPrediction } from "@/models/FraudPrediction";
 import { SnakeNamingStrategy } from "typeorm-naming-strategies";
+import { ChurnPrediction } from "@/models/ChurnPrediction";
 import { Session } from "@/models/Session";
 
 export const AppDataSource = new DataSource({
@@ -39,6 +40,7 @@ export const AppDataSource = new DataSource({
     Setting,
     User,
     FraudPrediction,
+    ChurnPrediction,
     Session,
     User
   ],
