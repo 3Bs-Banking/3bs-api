@@ -23,10 +23,18 @@ export class AppointmentController extends BaseController<Appointment> {
         branch: z.object({ id: z.string().uuid() }),
         service: z.object({ id: z.string().uuid() }),
         customer: z.object({ id: z.string().uuid() }),
-        window: z.object({ id: z.string().uuid() }),
-        employee: z.object({ id: z.string().uuid() }).nullable(),
-        appointmentStartDate: z.string().min(1, "Start date is required"),
-        appointmentStartTime: z.string().min(1, "Start time is required"),
+        window: z.object({ id: z.string().uuid() }).nullable().optional(),
+        employee: z.object({ id: z.string().uuid() }).nullable().optional(),
+        appointmentStartDate: z
+          .string()
+          .min(1, "Start date is required")
+          .nullable()
+          .optional(),
+        appointmentStartTime: z
+          .string()
+          .min(1, "Start time is required")
+          .nullable()
+          .optional(),
         appointmentEndDate: z.string().nullable().optional(),
         appointmentEndTime: z.string().nullable().optional(),
         status: z.nativeEnum(AppointmentStatus),
@@ -71,6 +79,8 @@ export class AppointmentController extends BaseController<Appointment> {
       );
       if (!employee) throw new Error("Employee not found");
     }
+
+    parsedBody.bank = branch.bank;
 
     return parsedBody;
   }

@@ -11,7 +11,8 @@ const envVariables = z.object({
   DB_NAME: z.string(),
   PORT: z.string(),
   HOST: z.string(),
-  SESSION_SECRET: z.string()
+  SESSION_SECRET: z.string(),
+  REDIS_URL: z.string()
 });
 
 envVariables.parse(process.env);
