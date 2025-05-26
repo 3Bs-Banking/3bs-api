@@ -65,4 +65,3 @@ export class ChurnPredictionService extends BaseService<ChurnPrediction> {
     });
   }
 }
-//revice it seifo ASAP

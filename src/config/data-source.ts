@@ -14,7 +14,7 @@ import { User } from "../models/User";
 import { FraudPrediction } from "@/models/FraudPrediction";
 import { SnakeNamingStrategy } from "typeorm-naming-strategies";
 import { ChurnPrediction } from "@/models/ChurnPrediction";
-
+import { ForexPrediction } from "@/models/ForexPrediction";
 export const AppDataSource = new DataSource({
   type: "postgres",
   // url: process.env.DB_URL,
@@ -39,7 +39,8 @@ export const AppDataSource = new DataSource({
     Setting,
     User,
     FraudPrediction,
-    ChurnPrediction
+    ChurnPrediction,
+    ForexPrediction
   ],
   migrations: [],
   subscribers: [],
