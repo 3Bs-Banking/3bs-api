@@ -48,17 +48,15 @@ export class BranchController extends BaseController<Branch> {
 
   protected override async getScopedWhere(
     req: Request
-  ): Promise<FindOptionsWhere<Branch>> {
+  ): Promise<FindOptionsWhere<Branch> | null> {
     const user = (await Container.get(UserService).findById(req.user!.id, {
       bank: true,
       branch: true
     }))!;
 
-    console.log(user);
-
     if (user.role === UserRole.ADMIN) return { bank: { id: user.bank.id } };
     else if (user.role === UserRole.MANAGER) return { id: user.branch.id };
 
-    return {};
+    return null;
   }
 }

@@ -23,8 +23,8 @@ export class AppointmentController extends BaseController<Appointment> {
         branch: z.object({ id: z.string().uuid() }),
         service: z.object({ id: z.string().uuid() }),
         customer: z.object({ id: z.string().uuid() }),
-        window: z.object({ id: z.string().uuid() }).nullable().optional(),
-        employee: z.object({ id: z.string().uuid() }).nullable().optional(),
+        // window: z.object({ id: z.string().uuid() }).nullable().optional(),
+        // employee: z.object({ id: z.string().uuid() }).nullable().optional(),
         appointmentStartDate: z
           .string()
           .min(1, "Start date is required")
@@ -68,10 +68,12 @@ export class AppointmentController extends BaseController<Appointment> {
     );
     if (!customer) throw new Error("Customer not found");
 
-    const window = await Container.get(CustomerService).findById(
-      parsedBody.window!.id!
-    );
-    if (!window) throw new Error("Window not found");
+    if (parsedBody.window) {
+      const window = await Container.get(CustomerService).findById(
+        parsedBody.window!.id!
+      );
+      if (!window) throw new Error("Window not found");
+    }
 
     if (parsedBody.employee) {
       const employee = await Container.get(EmployeeService).findById(
@@ -87,7 +89,7 @@ export class AppointmentController extends BaseController<Appointment> {
 
   protected override async getScopedWhere(
     req: Request
-  ): Promise<FindOptionsWhere<Appointment>> {
+  ): Promise<FindOptionsWhere<Appointment> | null> {
     const user = (await Container.get(UserService).findById(req.user!.id, {
       bank: true,
       branch: true
@@ -97,6 +99,6 @@ export class AppointmentController extends BaseController<Appointment> {
     else if (user.role === UserRole.MANAGER)
       return { branch: { id: user.branch.id } };
 
-    return {};
+    return null;
   }
 }

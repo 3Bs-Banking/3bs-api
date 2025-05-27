@@ -47,7 +47,7 @@ export class FeedbackController extends BaseController<Feedback> {
 
   protected override async getScopedWhere(
     req: Request
-  ): Promise<FindOptionsWhere<Feedback>> {
+  ): Promise<FindOptionsWhere<Feedback> | null> {
     const user = (await Container.get(UserService).findById(req.user!.id, {
       bank: true,
       branch: true
@@ -58,6 +58,6 @@ export class FeedbackController extends BaseController<Feedback> {
     else if (user.role === UserRole.MANAGER)
       return { appointment: { branch: { id: user.branch.id } } };
 
-    return {};
+    return null;
   }
 }

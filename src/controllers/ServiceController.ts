@@ -38,7 +38,7 @@ export class ServiceController extends BaseController<ServiceEntity> {
 
   protected override async getScopedWhere(
     req: Request
-  ): Promise<FindOptionsWhere<ServiceEntity>> {
+  ): Promise<FindOptionsWhere<ServiceEntity> | null> {
     const user = (await Container.get(UserService).findById(req.user!.id, {
       bank: true,
       branch: true
@@ -46,6 +46,6 @@ export class ServiceController extends BaseController<ServiceEntity> {
 
     if (user.role === UserRole.ADMIN) return { bank: { id: user.bank.id } };
 
-    return {};
+    return null;
   }
 }

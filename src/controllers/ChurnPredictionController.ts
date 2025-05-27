@@ -48,8 +48,8 @@ export class ChurnPredictionController extends BaseController<ChurnPrediction> {
           "Income_Category_$40K_-_$60K": z.number(),
           "Income_Category_$60K_-_$80K": z.number(),
           "Income_Category_$80K_-_$120K": z.number(),
-          "Income_Category_Less_than_$40K": z.number(),
-          "Income_Category_Unknown": z.number(),
+          Income_Category_Less_than_$40K: z.number(),
+          Income_Category_Unknown: z.number(),
 
           // Card Category (one-hot)
           Card_Category_Gold: z.number(),
