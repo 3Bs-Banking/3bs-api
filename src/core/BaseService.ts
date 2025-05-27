@@ -124,4 +124,9 @@ export default abstract class BaseService<T extends ObjectLiteral> {
     const result = await this.repository.delete(id);
     return result.affected !== 0;
   }
+
+  async count(options: FindOptionsWhere<T>) {
+    const result = await this.repository.count({ where: options });
+    return result;
+  }
 }
