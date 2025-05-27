@@ -51,7 +51,7 @@ export class ChurnPredictionService extends BaseService<ChurnPrediction> {
             } else {
               reject("Unexpected prediction value: " + value);
             }
-          } catch (e) {
+          } catch {
             reject("Failed to parse Python output.");
           }
         });
@@ -65,4 +65,3 @@ export class ChurnPredictionService extends BaseService<ChurnPrediction> {
     });
   }
 }
-//revice it seifo ASAP
