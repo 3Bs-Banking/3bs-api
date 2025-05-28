@@ -46,7 +46,7 @@ export class FraudPredictionService extends BaseService<FraudPrediction> {
           try {
             const parsed = JSON.parse(result);
             resolve(parsed.prediction);
-          } catch (e) {
+          } catch {
             reject("Failed to parse prediction");
           }
         });

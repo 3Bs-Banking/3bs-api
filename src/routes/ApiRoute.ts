@@ -14,7 +14,10 @@ import WindowToServiceRoute from "@/routes/WindowToServiceRoute";
 import FraudPredictionRoute from "@/routes/FraudPredictionRoute";
 import ChurnPredictionRoute from "@/routes/ChurnPredictionRoute";
 import ForexPredictionRoute from "@/routes/ForexPredictionRoute";
+<<<<<<< HEAD:src/routes/ApiRoute.ts
 import { isAuthenticated } from "@/middleware/AuthMiddleware";
+=======
+>>>>>>> aca6858 (Fix errors):src/routes/apiRoute.ts
 
 const app = Router();
 

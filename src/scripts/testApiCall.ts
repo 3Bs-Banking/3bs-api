@@ -1,6 +1,6 @@
 import "reflect-metadata";
 import "../config/env";
-import { fetchForexPrice } from "../core/ForexApiClient"; 
+import { fetchForexPrice } from "../core/ForexApiClient";
 
 async function test() {
   try {
