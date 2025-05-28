@@ -13,6 +13,7 @@ import WindowRoute from "@/routes/WindowRoute";
 import WindowToServiceRoute from "@/routes/WindowToServiceRoute";
 import FraudPredictionRoute from "@/routes/FraudPredictionRoute";
 import ChurnPredictionRoute from "@/routes/ChurnPredictionRoute";
+import ForexPredictionRoute from "@/routes/ForexPredictionRoute";
 import { isAuthenticated } from "@/middleware/AuthMiddleware";
 
 const app = Router();
@@ -31,5 +32,6 @@ app.use("/window", isAuthenticated, WindowRoute);
 app.use("/window-to-service", isAuthenticated, WindowToServiceRoute);
 app.use("/fraud-predictions", isAuthenticated, FraudPredictionRoute);
 app.use("/churn-predictions", isAuthenticated, ChurnPredictionRoute);
+app.use("/forex-predictions", ForexPredictionRoute);
 
 export default app;
