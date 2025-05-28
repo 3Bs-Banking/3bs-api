@@ -8,10 +8,11 @@ import { BranchService } from "@/services/BranchService";
 import { ServiceService } from "@/services/Service";
 import { CustomerService } from "@/services/CustomerService";
 import { EmployeeService } from "@/services/EmployeeService";
-import { Request } from "express";
+import { Request, Response } from "express";
 import { FindOptionsWhere } from "typeorm";
 import { UserService } from "@/services/UserService";
 import { UserRole } from "@/models/User";
+import { BankService } from "@/services/BankService";
 
 @Service()
 export class AppointmentController extends BaseController<Appointment> {
@@ -98,7 +99,41 @@ export class AppointmentController extends BaseController<Appointment> {
     if (user.role === UserRole.ADMIN) return { bank: { id: user.bank.id } };
     else if (user.role === UserRole.MANAGER)
       return { branch: { id: user.branch.id } };
+    else if (user.role === UserRole.CUSTOMER)
+      return { customer: { email: user.email } };
 
     return null;
+  }
+
+  public async getLength(req: Request, res: Response) {
+    const bankId = req.query.bankId;
+
+    if (typeof bankId !== "string") {
+      res.status(400).json({
+        error: { message: "Missing or invalid [bankId] query parameter" }
+      });
+      return;
+    }
+
+    if (!(await Container.get(BankService).findById(bankId))) {
+      res.status(400).json({
+        error: { message: "Invalid [bankId] query parameter" }
+      });
+      return;
+    }
+
+    const queryResult = this.service.query(
+      `SELECT 
+        b.id AS branch_id,
+        b.name AS branch_name,
+        COUNT(*) AS appointment_count
+      FROM appointments a
+      JOIN branch b ON a.branch_id = b.id
+      WHERE a.bank_id = $1 AND a.status = 'Pending'
+      GROUP BY b.id, b.name;`,
+      [bankId]
+    );
+
+    res.json({ data: { counts: queryResult } });
   }
 }
