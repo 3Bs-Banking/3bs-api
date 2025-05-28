@@ -3,7 +3,11 @@ import "reflect-metadata";
 import { AppDataSource as db } from "@/config/data-source";
 import { faker } from "@faker-js/faker";
 import moment from "moment";
-import { Appointment, AppointmentStatus } from "@/models/Appointment";
+import {
+  Appointment,
+  AppointmentStatus,
+  ReservationType
+} from "@/models/Appointment";
 import { DeepPartial } from "typeorm";
 import { Window } from "@/models/Window";
 import { Feedback } from "@/models/Feedback";
@@ -145,8 +149,10 @@ function createRandomAppointment(): DeepPartial<Appointment> {
     appointmentStartTime: startTime,
     appointmentEndDate: date,
     appointmentEndTime: endTime,
-    status: AppointmentStatus.COMPLETED,
-    reservationType: ["Offline", "Online"][
+    status: [AppointmentStatus.COMPLETED, AppointmentStatus.PENDING][
+      rand(2)
+    ] as Appointment["status"],
+    reservationType: [ReservationType.OFFLINE, ReservationType.ONLINE][
       rand(2)
     ] as Appointment["reservationType"]
   };
@@ -172,7 +178,7 @@ function createRandomFeedback(): DeepPartial<Feedback> {
 }
 
 const banks = faker.helpers.multiple(createRandomBank, { count: 5 });
-const branches = faker.helpers.multiple(createRandomBranches, { count: 30 });
+const branches = faker.helpers.multiple(createRandomBranches, { count: 10 });
 const customers = faker.helpers.multiple(createRandomCustomer, { count: 150 });
 let windows: DeepPartial<Window>[] = [];
 windows = faker.helpers.multiple(createRandomWindow, { count: 600 });
