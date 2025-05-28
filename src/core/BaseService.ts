@@ -125,8 +125,25 @@ export default abstract class BaseService<T extends ObjectLiteral> {
     return result.affected !== 0;
   }
 
+  /**
+   * Counts entities matching the given options.
+   *
+   * @param {FindOptionsWhere<T>} options - The search criteria.
+   * @returns {Promise<number>} count of elements
+   */
   async count(options: FindOptionsWhere<T>) {
     const result = await this.repository.count({ where: options });
     return result;
+  }
+
+  /**
+   * Perform raw query on database
+   *
+   * @param {FindOptionsWhere<T>} query - The search criteria.
+   * @param {any[]} parameters - Parameters to be put in SQL placeholders
+   * @returns {Promise<any>} query result
+   */
+  query(query: string, parameters?: any[]) {
+    return this.repository.query(query, parameters);
   }
 }
