@@ -3,7 +3,6 @@ import BaseService from "@/core/BaseService";
 import { ForexPrediction } from "@/models/ForexPrediction";
 import { Between } from "typeorm";
 import { DateTime } from "luxon";
-import { spawn } from "child_process";
 
 interface ForexPriceInput {
   currency: "USD" | "GBP";
@@ -24,11 +23,11 @@ export class ForexPredictionService extends BaseService<ForexPrediction> {
     const startOfDay = cairoNow.startOf("day").toJSDate();
     const endOfDay = cairoNow.endOf("day").toJSDate();
     const existing = await this.repository.findOne({
-    where: {
+      where: {
         currency,
         createdAt: Between(startOfDay, endOfDay)
-    },
-    order: { createdAt: "DESC" }
+      },
+      order: { createdAt: "DESC" }
     });
 
     if (!existing) {
@@ -60,18 +59,17 @@ export class ForexPredictionService extends BaseService<ForexPrediction> {
   }
 
   async predictClosingPrice(currency: "USD" | "GBP"): Promise<void> {
-        const today = DateTime.now().setZone("Africa/Cairo");
-        const start = today.startOf("day").toJSDate();
-        const end = today.endOf("day").toJSDate();
+    const today = DateTime.now().setZone("Africa/Cairo");
+    const start = today.startOf("day").toJSDate();
+    const end = today.endOf("day").toJSDate();
 
-        const record = await this.repository.findOne({
-        where: {
-            currency,
-            createdAt: Between(start, end)
-        },
-        order: { createdAt: "DESC" }
-        });
-
+    const record = await this.repository.findOne({
+      where: {
+        currency,
+        createdAt: Between(start, end)
+      },
+      order: { createdAt: "DESC" }
+    });
 
     if (!record) return;
 
@@ -122,15 +120,14 @@ export class ForexPredictionService extends BaseService<ForexPrediction> {
   //     }
   //   });
   // }
-      private async callPythonModel(data: {
-      open: number;
-      high: number;
-      low: number;
-      currency: string;
-    }): Promise<number> {
-      const avg = (data.open + data.high + data.low) / 3;
-      console.log(`[Mock AI] Predicted close for ${data.currency}: ${avg}`);
-      return parseFloat(avg.toFixed(4));
-    }
-
+  private async callPythonModel(data: {
+    open: number;
+    high: number;
+    low: number;
+    currency: string;
+  }): Promise<number> {
+    const avg = (data.open + data.high + data.low) / 3;
+    console.log(`[Mock AI] Predicted close for ${data.currency}: ${avg}`);
+    return parseFloat(avg.toFixed(4));
+  }
 }

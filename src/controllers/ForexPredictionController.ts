@@ -1,6 +1,7 @@
 import { BaseController } from "@/core/BaseController";
 import { ForexPrediction } from "@/models/ForexPrediction";
 import { ForexPredictionService } from "@/services/ForexPredictionService";
+import { Request, Response } from "express";
 import { Service } from "typedi";
 import { z } from "zod";
 

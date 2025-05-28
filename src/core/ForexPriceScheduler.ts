@@ -1,6 +1,6 @@
 import { fetchForexPrice } from "@/core/ForexApiClient";
 import { ForexPredictionService } from "@/services/ForexPredictionService";
-import { isEgyptHoliday } from "@/core/HolidayService"; // 
+import { isEgyptHoliday } from "@/core/HolidayService"; //
 import { Container } from "typedi";
 import cron from "node-cron";
 import { DateTime } from "luxon";
@@ -24,7 +24,9 @@ export function startForexSchedule() {
       (hour === 14 && minute <= 20);
 
     if (!isActiveTime || isWeekend || isHoliday) {
-      console.log(`⏸ Skipping: ${isWeekend ? "Weekend" : isHoliday ? "Holiday" : "Outside hours"} at ${now.toISO()}`);
+      console.log(
+        `⏸ Skipping: ${isWeekend ? "Weekend" : isHoliday ? "Holiday" : "Outside hours"} at ${now.toISO()}`
+      );
       return;
     }
 

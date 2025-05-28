@@ -1,7 +1,7 @@
 import { BankController } from "@/controllers/BankController";
 import { Router } from "express";
 import Container from "typedi";
-// Routs and Controllers 
+// Routs and Controllers
 const app = Router();
 
 const bankController = Container.get(BankController);

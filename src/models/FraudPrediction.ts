@@ -4,7 +4,7 @@ import {
   Column,
   CreateDateColumn,
   ManyToOne,
-  JoinColumn,
+  JoinColumn
 } from "typeorm";
 import { Bank } from "@/models/Bank";
 

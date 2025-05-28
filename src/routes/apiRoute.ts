@@ -14,7 +14,6 @@ import FraudPredictionRoute from "@/routes/FraudPredictionRoute";
 import ChurnPredictionRoute from "@/routes/ChurnPredictionRoute";
 import ForexPredictionRoute from "@/routes/ForexPredictionRoute";
 
-
 const app = Router();
 
 app.use("/bank", BankRoute);

@@ -46,7 +46,7 @@ export abstract class BaseController<T extends ObjectLiteral> {
    * Retrieves the service instance from the container.
    * @returns The service instance.
    */
-  private get service(): BaseService<T> {
+  protected get service(): BaseService<T> {
     return Container.get(this.serviceClass);
   }
 

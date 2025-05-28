@@ -18,7 +18,7 @@ export async function isEgyptHoliday(date: DateTime): Promise<boolean> {
     });
 
     const holidays = response.data.holidays as { date: string }[];
-    return holidays.some(h => h.date === date.toISODate());
+    return holidays.some((h) => h.date === date.toISODate());
   } catch (err) {
     const error = err as Error;
     console.error("Failed to fetch holiday data:", error.message);
