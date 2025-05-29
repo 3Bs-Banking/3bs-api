@@ -4,7 +4,7 @@ import { UserRole } from "@/models/User";
 import { BankService } from "@/services/BankService";
 import { BranchService } from "@/services/BranchService";
 import { UserService } from "@/services/UserService";
-import { Request } from "express";
+import { Request, Response } from "express";
 import Container, { Service } from "typedi";
 import { FindOptionsWhere } from "typeorm";
 import { z, ZodType } from "zod";
@@ -33,6 +33,39 @@ export class BranchController extends BaseController<Branch> {
         })
       }) as unknown as ZodType<Partial<Branch>>,
       relations: { bank: true }
+    });
+  }
+
+  public override async list(req: Request, res: Response): Promise<void> {
+    const user = (await Container.get(UserService).findById(req.user!.id))!;
+
+    if (user.role !== UserRole.CUSTOMER) return super.list(req, res);
+
+    if (!req.query.bankId || typeof req.query.bankId !== "string") {
+      res.status(404).json({
+        error: { message: "Missing or invalid [bankId] query parameter" }
+      });
+      return;
+    }
+
+    const entities = await this.service.find({
+      bank: { id: req.query.bankId }
+    });
+
+    res.json({
+      data: {
+        branches: entities.map((branch) => ({
+          id: branch.id,
+          name: branch.name,
+          address: branch.address,
+          city: branch.city,
+          state: branch.state,
+          zipCode: branch.zipCode,
+          contactNumber: branch.contactNumber,
+          latitude: branch.latitude,
+          longitude: branch.longitude
+        }))
+      }
     });
   }
 

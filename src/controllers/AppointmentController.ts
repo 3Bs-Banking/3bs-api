@@ -26,18 +26,19 @@ export class AppointmentController extends BaseController<Appointment> {
         customer: z.object({ id: z.string().uuid() }),
         // window: z.object({ id: z.string().uuid() }).nullable().optional(),
         // employee: z.object({ id: z.string().uuid() }).nullable().optional(),
-        appointmentStartDate: z
-          .string()
-          .min(1, "Start date is required")
-          .nullable()
-          .optional(),
-        appointmentStartTime: z
-          .string()
-          .min(1, "Start time is required")
-          .nullable()
-          .optional(),
-        appointmentEndDate: z.string().nullable().optional(),
-        appointmentEndTime: z.string().nullable().optional(),
+        // appointmentStartDate: z
+        //   .string()
+        //   .min(1, "Start date is required")
+        //   .nullable()
+        //   .optional(),
+        // appointmentStartTime: z
+        //   .string()
+        //   .min(1, "Start time is required")
+        //   .nullable()
+        //   .optional(),
+        // appointmentEndDate: z.string().nullable().optional(),
+        // appointmentEndTime: z.string().nullable().optional(),
+        appointmentScheduledTimestamp: z.string().datetime(),
         status: z.nativeEnum(AppointmentStatus),
         reservationType: z.nativeEnum(ReservationType)
       }) as unknown as ZodType<Partial<Appointment>>,
@@ -122,12 +123,16 @@ export class AppointmentController extends BaseController<Appointment> {
       return;
     }
 
-    const queryResult = this.service.query(
+    const queryResult: {
+      branchId: string;
+      branchName: string;
+      appointmentCount: string;
+    }[] = await this.service.query(
       `SELECT 
-        b.id AS branch_id,
-        b.name AS branch_name,
-        COUNT(*) AS appointment_count
-      FROM appointments a
+        b.id AS "branchId",
+        b.name AS "branchName",
+        COUNT(*) AS "appointmentCount"
+      FROM appointment a
       JOIN branch b ON a.branch_id = b.id
       WHERE a.bank_id = $1 AND a.status = 'Pending'
       GROUP BY b.id, b.name;`,
@@ -135,5 +140,54 @@ export class AppointmentController extends BaseController<Appointment> {
     );
 
     res.json({ data: { counts: queryResult } });
+  }
+
+  public async getLast(req: Request, res: Response) {
+    const user = (await Container.get(UserService).findById(req.user!.id))!;
+    if (user.role !== UserRole.CUSTOMER) {
+      res.status(403).json({ error: { message: "Forbidden" } });
+      return;
+    }
+
+    const queryResult = (
+      await this.service.query(
+        `SELECT 
+          a.id AS "appointmentId",
+          b.id AS "bankId",
+          b.name AS "bankName",
+          br.id AS "branchId",
+          br.name AS "branchName",
+          s.id AS "serviceId",
+          s.service_name AS "serviceName",
+          s.service_category AS "serviceCategory",
+          s.description AS "serviceDescription"
+        FROM appointment a
+        JOIN customer c ON a.customer_id = c.id
+        JOIN bank b ON a.bank_id = b.id
+        JOIN branch br ON a.branch_id = br.id
+        JOIN service s ON a.service_id = s.id
+        WHERE c.email = $1 AND a.status = 'Pending'
+        ORDER BY a.created_at DESC
+        LIMIT 1;`,
+        [user.email]
+      )
+    )[0];
+
+    if (!queryResult) {
+      res.json({ data: { appointment: null } });
+      return;
+    }
+
+    const appointmentCount = await this.service.count({
+      branch: { id: queryResult.branchId },
+      status: AppointmentStatus.PENDING
+    });
+
+    res.json({
+      data: {
+        appointment: queryResult,
+        appointmentsRemaining: appointmentCount
+      }
+    });
   }
 }
