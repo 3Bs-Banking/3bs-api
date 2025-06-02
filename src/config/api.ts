@@ -16,7 +16,7 @@ export default function config() {
 
   app.use(express.urlencoded({ extended: false }));
   app.use(express.json());
-  app.use(cors());
+  app.use(cors({ origin: process.env.MOBILE_APP_HOST, credentials: true }));
   app.use(
     session({
       secret: process.env.SESSION_SECRET,

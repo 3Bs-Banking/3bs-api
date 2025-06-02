@@ -12,7 +12,8 @@ const envVariables = z.object({
   PORT: z.string(),
   HOST: z.string(),
   SESSION_SECRET: z.string(),
-  REDIS_URL: z.string()
+  REDIS_URL: z.string(),
+  MOBILE_APP_HOST: z.string()
 });
 
 envVariables.parse(process.env);
