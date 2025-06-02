@@ -3,6 +3,7 @@ import { User, UserRole } from "@/models/User";
 import { UserService } from "@/services/UserService";
 import { Request, Response } from "express";
 import Container, { Service } from "typedi";
+import { DeepPartial } from "typeorm";
 import { z } from "zod";
 
 @Service()
@@ -16,7 +17,14 @@ export class UserController extends BaseController<User> {
   }
 
   public async list(req: Request, res: Response): Promise<void> {
-    const user = await Container.get(UserService).findById(req.user!.id);
+    const user: DeepPartial<User> | null = await Container.get(
+      UserService
+    ).findById(req.user!.id, {
+      bank: true
+    });
+
+    if (user) delete user.password;
+
     res.json({ data: { user: user } });
   }
 }
