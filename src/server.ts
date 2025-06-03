@@ -5,6 +5,7 @@ import express from "express";
 import { AppDataSource as db } from "@/config/data-source";
 import apiConfig from "@/config/api";
 import apiRoute from "@/routes/ApiRoute";
+import { startForexSchedule } from "@/core/ForexPriceScheduler";
 
 async function start() {
   console.log("Initializing DB");
@@ -17,6 +18,8 @@ async function start() {
   app.use(apiConfig());
 
   app.use("/api", apiRoute);
+
+  // startForexSchedule();
 
   app.listen(process.env.PORT || 5000, () => {
     console.log(

@@ -14,7 +14,7 @@ export interface ForexPriceResponse {
 }
 
 export async function fetchForexPrice(
-  baseCurrency: ForexCurrency
+  baseCurrency: ForexCurrency,
 ): Promise<ForexPriceResponse> {
   if (!API_KEY) {
     throw new Error("Missing FOREX_API_KEY in environment variables");
@@ -25,8 +25,8 @@ export async function fetchForexPrice(
       params: {
         from: baseCurrency,
         to: "EGP",
-        api_key: API_KEY
-      }
+        api_key: API_KEY,
+      },
     });
 
     const rate = response.data?.result?.["EGP"];
@@ -37,15 +37,15 @@ export async function fetchForexPrice(
     }
 
     return {
-      currency: baseCurrency, // ✅ added field to match ForexPriceInput
+      currency: baseCurrency,
       toCurrency: "EGP",
       rate,
-      timestamp
+      timestamp,
     };
   } catch (err: any) {
     console.error(
       `[ForexApiClient] Failed to fetch ${baseCurrency}/EGP:`,
-      err.message
+      err.message,
     );
     throw new Error("Failed to fetch exchange rate");
   }

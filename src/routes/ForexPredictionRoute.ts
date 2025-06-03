@@ -5,9 +5,6 @@ import { ForexPredictionController } from "@/controllers/ForexPredictionControll
 const router = Router();
 const controller = Container.get(ForexPredictionController);
 
-router.get("/", (req, res) => controller.list(req, res));
-router.get("/:id", (req, res) => controller.getId(req, res));
-router.post("/", (req, res) => controller.post(req, res));
-router.delete("/:id", (req, res) => controller.delete(req, res));
+router.get("/", (req, res) => controller.getLast(req, res));
 
 export default router;

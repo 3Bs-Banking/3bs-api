@@ -84,6 +84,92 @@ export class ForexPredictionService extends BaseService<ForexPrediction> {
     await this.repository.save(record);
   }
 
+  /**
+   * Get the latest forex prediction for a specific currency
+   * @param currency - Currency code (USD or GBP)
+   * @returns The latest ForexPrediction or null if not found
+   */
+  async getLatestByCurrency(currency: "USD" | "GBP"): Promise<ForexPrediction | null> {
+    return await this.repository.findOne({
+      where: { currency },
+      order: { createdAt: "DESC" }
+    });
+  }
+
+  /**
+   * Create a new price record
+   */
+  async createNewPriceRecord(input: ForexPriceInput): Promise<ForexPrediction> {
+    const { currency, rate } = input;
+
+    const newRecord = this.repository.create({
+      currency,
+      open: rate,
+      high: rate,
+      low: rate
+    });
+
+    return await this.repository.save(newRecord);
+  }
+
+  /**
+   * Update existing price record with new rate
+   */
+  async updateExistingPriceRecord(existing: ForexPrediction, input: ForexPriceInput): Promise<string> {
+    const { rate } = input;
+    const updates: string[] = [];
+
+    // Update high if new rate is higher
+    if (rate > existing.high) {
+      existing.high = rate;
+      updates.push(`High: ${rate}`);
+    }
+
+    // Update low if new rate is lower
+    if (rate < existing.low) {
+      existing.low = rate;
+      updates.push(`Low: ${rate}`);
+    }
+
+    if (updates.length > 0) {
+      await this.repository.save(existing);
+      return updates.join(', ');
+    }
+
+    return "No changes needed";
+  }
+
+  /**
+   * Calculate predicted close using ML model and save
+   */
+  async calculateAndSavePredictedClose(currency: "USD" | "GBP"): Promise<void> {
+    const latest = await this.getLatestByCurrency(currency);
+
+    if (!latest) {
+      // Skipping if no data available for prediction
+      return;
+    }
+
+    // Only calculate if we don't already have a predicted close
+    if (latest.predictedClose !== null) {
+      return;
+    }
+
+    try {
+      const predictedClose = await this.callPythonModel({
+        open: latest.open,
+        high: latest.high,
+        low: latest.low,
+        currency
+      });
+
+      latest.predictedClose = predictedClose;
+      await this.repository.save(latest);
+    } catch (error) {
+      // Silently handle prediction error
+    }
+  }
+
   // private async callPythonModel(data: {
   //   open: number;
   //   high: number;
@@ -100,7 +186,6 @@ export class ForexPredictionService extends BaseService<ForexPrediction> {
   //       });
 
   //       py.stderr.on("data", (err) => {
-  //         console.error("Python Error:", err.toString());
   //         reject("Python script error.");
   //       });
 
@@ -120,14 +205,21 @@ export class ForexPredictionService extends BaseService<ForexPrediction> {
   //     }
   //   });
   // }
+
+  /**
+   * Call Python model for prediction
+   * TODO: Uncomment the code above and remove this mock when Python model is ready
+   */
   private async callPythonModel(data: {
     open: number;
     high: number;
     low: number;
     currency: string;
   }): Promise<number> {
+    // TEMPORARY: Mock implementation
+    // Replace with actual Python model call above when ready
     const avg = (data.open + data.high + data.low) / 3;
-    console.log(`[Mock AI] Predicted close for ${data.currency}: ${avg}`);
-    return parseFloat(avg.toFixed(4));
+    const prediction = avg * 1.002; // Mock 0.2% increase prediction
+    return parseFloat(prediction.toFixed(4));
   }
 }
