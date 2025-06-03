@@ -20,11 +20,8 @@ export class FraudPrediction {
   @Column("varchar", { length: 50 })
   prediction!: "Fraud" | "Not Fraud";
 
-  @Column()
-  bankId!: string;
-
   @ManyToOne(() => Bank, (bank) => bank.fraudPredictions, { eager: true })
-  @JoinColumn({ name: "bankId" })
+  @JoinColumn({ name: "bank_id" }) 
   bank!: Bank;
 
   @CreateDateColumn()
