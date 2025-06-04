@@ -24,44 +24,60 @@ export class ChurnPredictionService extends BaseService<ChurnPrediction> {
 
     return await this.repository.save(record);
   }
-
+  
   private async callPythonModel(
-    customerProfile: Record<string, any>
-  ): Promise<"Churn" | "No Churn"> {
-    return new Promise((resolve, reject) => {
-      try {
-        const py = spawn("python", ["python/churnModel.py"]);
-        let result = "";
-
-        py.stdout.on("data", (data) => {
-          result += data.toString();
-        });
-
-        py.stderr.on("data", (err) => {
-          console.error("Python Error:", err.toString());
-          reject("Python script error: " + err.toString());
-        });
-
-        py.on("close", () => {
-          try {
-            const parsed = JSON.parse(result);
-            const value = parsed.prediction;
-            if (value === "Churn" || value === "No Churn") {
-              resolve(value);
-            } else {
-              reject("Unexpected prediction value: " + value);
-            }
-          } catch {
-            reject("Failed to parse Python output.");
-          }
-        });
-
-        py.stdin.write(JSON.stringify(customerProfile));
-        py.stdin.end();
-      } catch (error) {
-        console.error("Spawn error:", error);
-        reject("Failed to run Python model");
-      }
-    });
+  customerProfile: Record<string, any>
+): Promise<"Churn" | "No Churn"> {
+  if (customerProfile.Total_Trans_Amt > 3000) {
+    return "Churn";
   }
+  if (customerProfile.Avg_Utilization_Ratio > 0.5) {
+    return "Churn";
+  }
+  if (customerProfile.Months_Inactive_12_mon > 6) {
+    return "Churn";
+  }
+  return "No Churn";
+}
+
+
+  // private async callPythonModel(
+  //   customerProfile: Record<string, any>
+  // ): Promise<"Churn" | "No Churn"> {
+  //   return new Promise((resolve, reject) => {
+  //     try {
+  //       const py = spawn("python", ["python/churnModel.py"]);
+  //       let result = "";
+
+  //       py.stdout.on("data", (data) => {
+  //         result += data.toString();
+  //       });
+
+  //       py.stderr.on("data", (err) => {
+  //         console.error("Python Error:", err.toString());
+  //         reject("Python script error: " + err.toString());
+  //       });
+
+  //       py.on("close", () => {
+  //         try {
+  //           const parsed = JSON.parse(result);
+  //           const value = parsed.prediction;
+  //           if (value === "Churn" || value === "No Churn") {
+  //             resolve(value);
+  //           } else {
+  //             reject("Unexpected prediction value: " + value);
+  //           }
+  //         } catch {
+  //           reject("Failed to parse Python output.");
+  //         }
+  //       });
+
+  //       py.stdin.write(JSON.stringify(customerProfile));
+  //       py.stdin.end();
+  //     } catch (error) {
+  //       console.error("Spawn error:", error);
+  //       reject("Failed to run Python model");
+  //     }
+  //   });
+  // }
 }
