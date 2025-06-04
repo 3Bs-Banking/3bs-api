@@ -38,7 +38,7 @@ export class Service {
   description!: string | null;
 
   @Column({
-    type: "integer",
+    type: "float",
     nullable: true
   })
   benchmarkTime!: number | null;

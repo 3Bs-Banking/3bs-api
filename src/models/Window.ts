@@ -29,9 +29,6 @@ export class Window {
   @Column({ type: "varchar", length: 255, nullable: true })
   category!: string | null;
 
-  @Column({ type: "integer", nullable: true })
-  currentAppointmentID!: number | null;
-
   @OneToMany(() => WindowToService, (windowToService) => windowToService.window)
   windowServices!: WindowToService[];
 

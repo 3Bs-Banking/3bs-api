@@ -93,8 +93,7 @@ function createRandomWindow(): DeepPartial<Window> {
     bank: branch.bank,
     branch: branch,
     windowNumber: windowsCount + 1,
-    category: ["Customer Service", "Teller"][rand(2)],
-    currentAppointmentID: null
+    category: ["Customer Service", "Teller"][rand(2)]
   };
 }
 
@@ -136,6 +135,25 @@ function createRandomAppointment(): DeepPartial<Appointment> {
 
   const { startTime, endTime } = generateRandomTimeSlot();
   const date = faker.date.anytime();
+  const reservationType = [ReservationType.OFFLINE, ReservationType.ONLINE][
+    rand(2)
+  ] as Appointment["reservationType"];
+
+  const [startHour, startMinute] = startTime.split(":").map((n) => parseInt(n));
+
+  const scheduledDate = moment(date)
+    .set("hour", startHour)
+    .set("minute", startMinute);
+
+  const randomScheduledDate = faker.date.between({
+    from: scheduledDate.clone().subtract(2, "hour").toDate(),
+    to: scheduledDate.toDate()
+  });
+
+  const randomArrivalDate = faker.date.between({
+    from: moment(randomScheduledDate).subtract(0.5, "hour").toDate(),
+    to: moment(randomScheduledDate).add(0.5, "hour").toDate()
+  });
 
   return {
     id: faker.string.uuid(),
@@ -145,6 +163,11 @@ function createRandomAppointment(): DeepPartial<Appointment> {
     customer: customer,
     window: window,
     employee: employee,
+    appointmentScheduledTimestamp:
+      reservationType === ReservationType.OFFLINE
+        ? undefined
+        : randomScheduledDate,
+    appointmentArrivalTimestamp: randomArrivalDate,
     appointmentStartDate: date,
     appointmentStartTime: startTime,
     appointmentEndDate: date,
@@ -152,9 +175,7 @@ function createRandomAppointment(): DeepPartial<Appointment> {
     status: [AppointmentStatus.COMPLETED, AppointmentStatus.PENDING][
       rand(2)
     ] as Appointment["status"],
-    reservationType: [ReservationType.OFFLINE, ReservationType.ONLINE][
-      rand(2)
-    ] as Appointment["reservationType"]
+    reservationType
   };
 }
 

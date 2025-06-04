@@ -107,14 +107,25 @@ export class AppointmentController extends BaseController<Appointment> {
   }
 
   public async getLength(req: Request, res: Response) {
-    const bankId = req.query.bankId;
+    const querySchema = z.object({
+      bankId: z.string().uuid(),
+      lat: z.coerce.number(),
+      long: z.coerce.number()
+    });
 
-    if (typeof bankId !== "string") {
+    const queryParsed = querySchema.safeParse(req.query);
+
+    if (!queryParsed.success) {
       res.status(400).json({
-        error: { message: "Missing or invalid [bankId] query parameter" }
+        error: {
+          message: "Invalid body",
+          issues: queryParsed.error.issues.map((i) => `${i.path}: ${i.message}`)
+        }
       });
       return;
     }
+
+    const { bankId, lat: userLatitude, long: userLongitude } = queryParsed.data;
 
     if (!(await Container.get(BankService).findById(bankId))) {
       res.status(400).json({
@@ -127,10 +138,14 @@ export class AppointmentController extends BaseController<Appointment> {
       branchId: string;
       branchName: string;
       appointmentCount: string;
+      branchLongitude: string;
+      branchLatitude: string;
     }[] = await this.service.query(
       `SELECT 
         b.id AS "branchId",
         b.name AS "branchName",
+        b.longitude AS "branchLongitude",
+        b.latitude AS "branchLatitude",
         COUNT(*) AS "appointmentCount"
       FROM appointment a
       JOIN branch b ON a.branch_id = b.id
@@ -139,7 +154,24 @@ export class AppointmentController extends BaseController<Appointment> {
       [bankId]
     );
 
-    res.json({ data: { counts: queryResult } });
+    let formattedOutput = queryResult.map((q) => ({
+      ...q,
+      appointmentCount: parseInt(q.appointmentCount),
+      branchLatitude: parseFloat(q.branchLatitude),
+      branchLongitude: parseFloat(q.branchLongitude),
+      distance: Math.sqrt(
+        (userLatitude - parseFloat(q.branchLatitude)) ** 2 +
+          (userLongitude - parseFloat(q.branchLongitude)) ** 2
+      )
+    }));
+
+    formattedOutput.sort((a, b) => a.distance - b.distance);
+
+    formattedOutput = formattedOutput.filter((_, i) => i < 5);
+
+    formattedOutput.sort((a, b) => a.appointmentCount - b.appointmentCount);
+
+    res.json({ data: { counts: formattedOutput } });
   }
 
   public async getLast(req: Request, res: Response) {
