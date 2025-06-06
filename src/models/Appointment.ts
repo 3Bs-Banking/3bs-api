@@ -5,7 +5,8 @@ import {
   ManyToOne,
   CreateDateColumn,
   UpdateDateColumn,
-  OneToOne
+  OneToOne,
+  JoinColumn
 } from "typeorm";
 import { Branch } from "./Branch";
 import { Service } from "./Service";
@@ -96,6 +97,7 @@ export class Appointment {
   @OneToOne(() => Feedback, (feedback) => feedback.appointment, {
     onDelete: "SET NULL"
   })
+  @JoinColumn()
   feedback!: Feedback | null;
 
   @CreateDateColumn({ type: "timestamptz" })

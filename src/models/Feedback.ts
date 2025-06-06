@@ -5,8 +5,7 @@ import {
   ManyToOne,
   CreateDateColumn,
   UpdateDateColumn,
-  OneToOne,
-  JoinColumn
+  OneToOne
 } from "typeorm";
 import { Appointment } from "./Appointment";
 import { Employee } from "./Employee";
@@ -19,7 +18,6 @@ export class Feedback {
   @OneToOne(() => Appointment, (appointment) => appointment.feedback, {
     onDelete: "CASCADE"
   })
-  @JoinColumn()
   appointment!: Appointment;
 
   @Column({ type: "integer" })
