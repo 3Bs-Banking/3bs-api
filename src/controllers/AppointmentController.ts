@@ -12,6 +12,7 @@ import { Request } from "express";
 import { FindOptionsWhere } from "typeorm";
 import { UserService } from "@/services/UserService";
 import { UserRole } from "@/models/User";
+import { WindowService } from "@/services/WindowService";
 
 @Service()
 export class AppointmentController extends BaseController<Appointment> {
@@ -60,7 +61,7 @@ export class AppointmentController extends BaseController<Appointment> {
     );
     if (!customer) throw new Error("Customer not found");
 
-    const window = await Container.get(CustomerService).findById(
+    const window = await Container.get(WindowService).findById(
       parsedBody.window!.id!
     );
     if (!window) throw new Error("Window not found");

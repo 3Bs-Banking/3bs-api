@@ -21,7 +21,7 @@ const app = Router();
 app.use("/auth", AuthRoute);
 app.use("/bank", isAuthenticated, BankRoute);
 app.use("/user", isAuthenticated, UserRoute);
-app.use("/appointment", isAuthenticated, AppointmentRoute);
+app.use("/appointment",  AppointmentRoute);
 app.use("/branch", isAuthenticated, BranchRoute);
 app.use("/customer", isAuthenticated, CustomerRoute);
 app.use("/employee", isAuthenticated, EmployeeRoute);

@@ -51,20 +51,26 @@ export class Appointment {
   customer!: Customer;
 
   @ManyToOne(() => Window, (window) => window.appointments, {
-    onDelete: "CASCADE"
+    onDelete: "SET NULL"
   })
-  window!: Window;
+  window!: Window | null;
 
   @ManyToOne(() => Employee, (employee) => employee.appointments, {
     onDelete: "SET NULL"
   })
   employee!: Employee | null;
 
-  @Column({ type: "date" })
-  appointmentStartDate!: Date;
+  @Column({ type: "timestamptz", nullable: true })
+  appointmentScheduledTimestamp!: Date;
 
-  @Column({ type: "time" })
-  appointmentStartTime!: string;
+  @Column({ type: "timestamptz", nullable: true })
+  appointmentArrivalTimestamp!: Date;
+
+  @Column({ type: "date", nullable: true })
+  appointmentStartDate!: Date | null;
+
+  @Column({ type: "time", nullable: true })
+  appointmentStartTime!: string | null;
 
   @Column({ type: "date", nullable: true })
   appointmentEndDate!: Date | null;
