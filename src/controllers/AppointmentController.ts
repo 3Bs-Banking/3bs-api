@@ -3,7 +3,7 @@ import { Appointment } from "@/models/Appointment";
 import { AppointmentService } from "@/services/AppointmentService";
 import { AppointmentStatus, ReservationType } from "@/models/Appointment";
 import Container, { Service } from "typedi";
-import { z, ZodType } from "zod";
+import { z, ZodError } from "zod";
 import { BranchService } from "@/services/BranchService";
 import { ServiceService } from "@/services/Service";
 import { CustomerService } from "@/services/CustomerService";
@@ -13,6 +13,10 @@ import { FindOptionsWhere } from "typeorm";
 import { UserService } from "@/services/UserService";
 import { UserRole } from "@/models/User";
 import { BankService } from "@/services/BankService";
+import { WindowService } from "@/services/WindowService";
+import { Window } from "@/models/Window";
+import { Employee } from "@/models/Employee";
+import moment from "moment";
 
 @Service()
 export class AppointmentController extends BaseController<Appointment> {
@@ -24,24 +28,14 @@ export class AppointmentController extends BaseController<Appointment> {
         branch: z.object({ id: z.string().uuid() }),
         service: z.object({ id: z.string().uuid() }),
         customer: z.object({ id: z.string().uuid() }),
-        // window: z.object({ id: z.string().uuid() }).nullable().optional(),
-        // employee: z.object({ id: z.string().uuid() }).nullable().optional(),
-        // appointmentStartDate: z
-        //   .string()
-        //   .min(1, "Start date is required")
-        //   .nullable()
-        //   .optional(),
-        // appointmentStartTime: z
-        //   .string()
-        //   .min(1, "Start time is required")
-        //   .nullable()
-        //   .optional(),
-        // appointmentEndDate: z.string().nullable().optional(),
-        // appointmentEndTime: z.string().nullable().optional(),
         appointmentScheduledTimestamp: z.string().datetime(),
-        status: z.nativeEnum(AppointmentStatus),
+        appointmentArrivalTimestamp: z
+          .string()
+          .datetime()
+          .optional()
+          .nullable(),
         reservationType: z.nativeEnum(ReservationType)
-      }) as unknown as ZodType<Partial<Appointment>>,
+      }),
       relations: {
         branch: true,
         service: true,
@@ -56,7 +50,8 @@ export class AppointmentController extends BaseController<Appointment> {
     const parsedBody = await super.validatePostBody(body);
 
     const branch = await Container.get(BranchService).findById(
-      parsedBody.branch!.id!
+      parsedBody.branch!.id!,
+      { bank: true }
     );
     if (!branch) throw new Error("Branch not found");
 
@@ -70,21 +65,23 @@ export class AppointmentController extends BaseController<Appointment> {
     );
     if (!customer) throw new Error("Customer not found");
 
-    if (parsedBody.window) {
-      const window = await Container.get(CustomerService).findById(
-        parsedBody.window!.id!
-      );
-      if (!window) throw new Error("Window not found");
-    }
+    const pendingAppointment = await this.service.findOne([
+      { customer, status: AppointmentStatus.PENDING },
+      { customer, status: AppointmentStatus.SERVING }
+    ]);
 
-    if (parsedBody.employee) {
-      const employee = await Container.get(EmployeeService).findById(
-        parsedBody.employee!.id!
-      );
-      if (!employee) throw new Error("Employee not found");
+    if (pendingAppointment)
+      throw Error("Customer already has pending appointment");
+
+    if (
+      parsedBody.appointmentArrivalTimestamp &&
+      parsedBody.reservationType === ReservationType.ONLINE
+    ) {
+      throw new Error("Online appointment cannot have arrival timestamp");
     }
 
     parsedBody.bank = branch.bank;
+    parsedBody.status = AppointmentStatus.PENDING;
 
     return parsedBody;
   }
@@ -181,45 +178,148 @@ export class AppointmentController extends BaseController<Appointment> {
       return;
     }
 
-    const queryResult = (
-      await this.service.query(
-        `SELECT 
-          a.id AS "appointmentId",
-          b.id AS "bankId",
-          b.name AS "bankName",
-          br.id AS "branchId",
-          br.name AS "branchName",
-          s.id AS "serviceId",
-          s.service_name AS "serviceName",
-          s.service_category AS "serviceCategory",
-          s.description AS "serviceDescription"
-        FROM appointment a
-        JOIN customer c ON a.customer_id = c.id
-        JOIN bank b ON a.bank_id = b.id
-        JOIN branch br ON a.branch_id = br.id
-        JOIN service s ON a.service_id = s.id
-        WHERE c.email = $1 AND a.status = 'Pending'
-        ORDER BY a.created_at DESC
-        LIMIT 1;`,
-        [user.email]
-      )
-    )[0];
+    const appointment = await this.service.findOne(
+      {
+        customer: { id: user.id },
+        status: AppointmentStatus.PENDING
+      },
+      { branch: true }
+    );
 
-    if (!queryResult) {
+    if (!appointment) {
       res.json({ data: { appointment: null } });
       return;
     }
 
     const appointmentCount = await this.service.count({
-      branch: { id: queryResult.branchId },
+      branch: { id: appointment.branch.id },
       status: AppointmentStatus.PENDING
     });
 
     res.json({
       data: {
-        appointment: queryResult,
+        appointment,
         appointmentsRemaining: appointmentCount
       }
     });
+  }
+
+  public async customerArrive(req: Request, res: Response): Promise<void> {
+    const appointment = await this.service.findById(req.params.appointment, {
+      bank: true,
+      branch: true,
+      service: true
+    });
+
+    if (!appointment) {
+      res.status(400).json({ error: { message: "Appointment not found" } });
+      return;
+    }
+
+    if (appointment.appointmentArrivalTimestamp !== null) {
+      res.status(400).json({
+        error: {
+          message: "Appointment already has arrival timestamp"
+        }
+      });
+      return;
+    }
+
+    await this.service.update(appointment.id, {
+      appointmentArrivalTimestamp: new Date()
+    });
+
+    const service = this.service as AppointmentService;
+    await service.addToken(
+      appointment!,
+      service.calculatePriority(appointment)
+    );
+
+    res.json({ data: { appointment } });
+  }
+
+  public async getNextToken(req: Request, res: Response) {
+    let window: Window | null = null;
+    let employee: Employee | null = null;
+
+    try {
+      const schema = z.object({
+        window: z.object({ id: z.string().uuid() }).nullable().optional(),
+        employee: z.object({ id: z.string().uuid() }).nullable().optional()
+      });
+
+      const parsedBody = schema.parse(req.body);
+
+      if (parsedBody.window) {
+        window = await Container.get(WindowService).findById(
+          parsedBody.window!.id!,
+          { branch: true }
+        );
+        if (!window) throw new Error("Window not found");
+      }
+
+      if (parsedBody.employee) {
+        employee = await Container.get(EmployeeService).findById(
+          parsedBody.employee!.id!
+        );
+        if (!employee) throw new Error("Employee not found");
+      }
+    } catch (error) {
+      if (error instanceof ZodError) {
+        res.status(400).json({
+          error: {
+            message: "Invalid body",
+            issues: error.issues.map((i) => `${i.path}: ${i.message}`)
+          }
+        });
+        return;
+      } else if (error instanceof Error) {
+        res.status(400).json({ error: { message: error.message } });
+        return;
+      }
+      return;
+    }
+
+    const service = this.service as AppointmentService;
+
+    const now = moment();
+
+    const previousAppointment = await service.findOne({
+      window: { id: window!.id },
+      status: AppointmentStatus.SERVING
+    });
+
+    console.log("previousAppointment:", previousAppointment);
+
+    if (previousAppointment)
+      await service.update(previousAppointment.id, {
+        status: AppointmentStatus.COMPLETED,
+        appointmentEndDate: now.toDate(),
+        appointmentEndTime: now.format("hh:mm")
+      });
+
+    await service.updateAllTokens(window!.branch.id);
+    const appointment = await service.getNextToken(window!.branch.id);
+
+    if (!appointment) {
+      res.json({ data: { appointment: null } });
+      return;
+    }
+
+    await service.update(appointment.id, {
+      employee,
+      window,
+      appointmentStartDate: now.toDate(),
+      appointmentStartTime: now.format("hh:mm"),
+      status: AppointmentStatus.SERVING
+    });
+
+    const allAppointmentData = await service.findById(appointment.id, {
+      window: true,
+      service: true,
+      employee: true
+    });
+
+    res.json({ data: { appointment: allAppointmentData } });
   }
 }

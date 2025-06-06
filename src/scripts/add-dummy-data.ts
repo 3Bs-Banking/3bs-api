@@ -157,7 +157,7 @@ function createRandomAppointment(): DeepPartial<Appointment> {
 
   return {
     id: faker.string.uuid(),
-    bank: service.bank,
+    bank: window.bank,
     branch: window.branch,
     service: service,
     customer: customer,
@@ -266,6 +266,7 @@ async function start() {
   Container.set("db", db);
 
   await generateData();
+  await db.destroy();
 }
 
 start();

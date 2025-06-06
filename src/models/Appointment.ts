@@ -4,7 +4,8 @@ import {
   Column,
   ManyToOne,
   CreateDateColumn,
-  UpdateDateColumn
+  UpdateDateColumn,
+  OneToOne
 } from "typeorm";
 import { Branch } from "./Branch";
 import { Service } from "./Service";
@@ -16,6 +17,7 @@ import { Bank } from "./Bank";
 
 export enum AppointmentStatus {
   PENDING = "Pending",
+  SERVING = "Serving",
   COMPLETED = "Completed",
   CANCELED = "Canceled"
 }
@@ -61,10 +63,10 @@ export class Appointment {
   employee!: Employee | null;
 
   @Column({ type: "timestamptz", nullable: true })
-  appointmentScheduledTimestamp!: Date;
+  appointmentScheduledTimestamp!: Date | null;
 
   @Column({ type: "timestamptz", nullable: true })
-  appointmentArrivalTimestamp!: Date;
+  appointmentArrivalTimestamp!: Date | null;
 
   @Column({ type: "date", nullable: true })
   appointmentStartDate!: Date | null;
@@ -91,7 +93,7 @@ export class Appointment {
   })
   reservationType!: ReservationType;
 
-  @ManyToOne(() => Feedback, (feedback) => feedback.appointment, {
+  @OneToOne(() => Feedback, (feedback) => feedback.appointment, {
     onDelete: "SET NULL"
   })
   feedback!: Feedback | null;

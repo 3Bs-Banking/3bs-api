@@ -29,7 +29,8 @@ export class AppointmentService extends BaseService<Appointment> {
 
   override async create(data: DeepPartial<Appointment>): Promise<Appointment> {
     const token = await super.create(data);
-    this.addToken(token, this.calculatePriority(token));
+    if (token.reservationType === ReservationType.OFFLINE)
+      await this.addToken(token, this.calculatePriority(token));
     return token;
   }
 
@@ -47,6 +48,7 @@ export class AppointmentService extends BaseService<Appointment> {
 
     await this.redis.zrem(queueKey, tokenId);
     await this.redis.del(tokenKey);
+    console.log("removed token:", tokenId);
   }
 
   async getNextToken(branchId: string): Promise<Appointment | null> {
@@ -55,8 +57,12 @@ export class AppointmentService extends BaseService<Appointment> {
 
     if (ids.length === 0) return null;
 
+    console.log("ids:", ids);
+
     const tokenId = this.getTokenKey(ids[0]);
     const tokenData = await this.redis.get(tokenId);
+    console.log("tokenData:", tokenData);
+    await this.removeToken(ids[0], branchId);
     return tokenData ? JSON.parse(tokenData) : null;
   }
 
@@ -90,16 +96,17 @@ export class AppointmentService extends BaseService<Appointment> {
       await this.updateTokenPriority(tokens[i].id, branchId, prorities[i]);
   }
 
-  private calculatePriority(token: Appointment): number {
+  public calculatePriority(token: Appointment): number {
     if (token.appointmentArrivalTimestamp === null) return 0;
 
     const now = new Date().getTime();
     let baseScore = 0;
-    const diff = token.appointmentScheduledTimestamp
-      ? token.appointmentScheduledTimestamp.getTime() - now
-      : 0;
 
     if (token.reservationType === ReservationType.ONLINE) {
+      const diff = token.appointmentScheduledTimestamp
+        ? new Date(token.appointmentScheduledTimestamp).getTime() - now
+        : 0;
+
       if (Math.abs(diff) <= GRACE_PERIOD) baseScore = 100;
       else if (diff > 0 && diff <= EARLY_LIMIT) baseScore = 9;
       else if (diff > EARLY_LIMIT) baseScore = 60;
@@ -109,12 +116,12 @@ export class AppointmentService extends BaseService<Appointment> {
     }
 
     const waitingTimeInMins =
-      (now - token.appointmentArrivalTimestamp.getTime()) / 60000;
+      (now - new Date(token.appointmentArrivalTimestamp).getTime()) / 60000;
     const agingBonus = Math.min(
       waitingTimeInMins * AGING_BONUS_MULTIPLIER,
       MAX_AGING_BONUS
     );
-    if (waitingTimeInMins > FORCE_SERVE_AFTER_MIN) return 999;
+    if (waitingTimeInMins > FORCE_SERVE_AFTER_MIN) baseScore = 999;
 
     return baseScore + agingBonus;
   }
