@@ -41,7 +41,11 @@ export class BranchController extends BaseController<Branch> {
 
     if (user.role !== UserRole.CUSTOMER) return super.list(req, res);
 
-    if (!req.query.bankId || typeof req.query.bankId !== "string") {
+    if (
+      !req.query.bankId ||
+      typeof req.query.bankId !== "string" ||
+      z.string().uuid().safeParse(req.query.bankId).error
+    ) {
       res.status(404).json({
         error: { message: "Missing or invalid [bankId] query parameter" }
       });
