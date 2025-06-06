@@ -7,7 +7,7 @@ async function runTest() {
   // Mock the repository to avoid DB usage
   (service as any).repository = {
     create: (data: any) => data,
-    save: async (data: any) => data, // simulate saving
+    save: async (data: any) => data // simulate saving
   };
 
   const result = await service.create({

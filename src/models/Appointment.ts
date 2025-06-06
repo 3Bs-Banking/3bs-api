@@ -4,7 +4,8 @@ import {
   Column,
   ManyToOne,
   CreateDateColumn,
-  UpdateDateColumn
+  UpdateDateColumn,
+  OneToOne
 } from "typeorm";
 import { Branch } from "./Branch";
 import { Service } from "./Service";
@@ -16,6 +17,7 @@ import { Bank } from "./Bank";
 
 export enum AppointmentStatus {
   PENDING = "Pending",
+  SERVING = "Serving",
   COMPLETED = "Completed",
   CANCELED = "Canceled"
 }
@@ -51,20 +53,26 @@ export class Appointment {
   customer!: Customer;
 
   @ManyToOne(() => Window, (window) => window.appointments, {
-    onDelete: "CASCADE"
+    onDelete: "SET NULL"
   })
-  window!: Window;
+  window!: Window | null;
 
   @ManyToOne(() => Employee, (employee) => employee.appointments, {
     onDelete: "SET NULL"
   })
   employee!: Employee | null;
 
-  @Column({ type: "date" })
-  appointmentStartDate!: Date;
+  @Column({ type: "timestamptz", nullable: true })
+  appointmentScheduledTimestamp!: Date | null;
 
-  @Column({ type: "time" })
-  appointmentStartTime!: string;
+  @Column({ type: "timestamptz", nullable: true })
+  appointmentArrivalTimestamp!: Date | null;
+
+  @Column({ type: "date", nullable: true })
+  appointmentStartDate!: Date | null;
+
+  @Column({ type: "time", nullable: true })
+  appointmentStartTime!: string | null;
 
   @Column({ type: "date", nullable: true })
   appointmentEndDate!: Date | null;
@@ -85,7 +93,7 @@ export class Appointment {
   })
   reservationType!: ReservationType;
 
-  @ManyToOne(() => Feedback, (feedback) => feedback.appointment, {
+  @OneToOne(() => Feedback, (feedback) => feedback.appointment, {
     onDelete: "SET NULL"
   })
   feedback!: Feedback | null;

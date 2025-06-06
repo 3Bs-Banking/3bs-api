@@ -1,7 +1,11 @@
 import { BaseController } from "@/core/BaseController";
 import { Customer } from "@/models/Customer";
+import { UserRole } from "@/models/User";
 import { CustomerService } from "@/services/CustomerService";
-import { Service } from "typedi";
+import { UserService } from "@/services/UserService";
+import { Request } from "express";
+import Container, { Service } from "typedi";
+import { FindOptionsWhere } from "typeorm";
 import { z, ZodType } from "zod";
 
 @Service()
@@ -22,5 +26,14 @@ export class CustomerController extends BaseController<Customer> {
           .optional()
       }) as unknown as ZodType<Partial<Customer>>
     });
+  }
+
+  protected override async getScopedWhere(
+    req: Request
+  ): Promise<FindOptionsWhere<Customer> | null> {
+    const user = (await Container.get(UserService).findById(req.user!.id))!;
+
+    if (user.role === UserRole.CUSTOMER) return { email: user.email };
+    return {};
   }
 }

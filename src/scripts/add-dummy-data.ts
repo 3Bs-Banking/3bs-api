@@ -3,7 +3,11 @@ import "reflect-metadata";
 import { AppDataSource as db } from "@/config/data-source";
 import { faker } from "@faker-js/faker";
 import moment from "moment";
-import { Appointment, AppointmentStatus } from "@/models/Appointment";
+import {
+  Appointment,
+  AppointmentStatus,
+  ReservationType
+} from "@/models/Appointment";
 import { DeepPartial } from "typeorm";
 import { Window } from "@/models/Window";
 import { Feedback } from "@/models/Feedback";
@@ -89,8 +93,7 @@ function createRandomWindow(): DeepPartial<Window> {
     bank: branch.bank,
     branch: branch,
     windowNumber: windowsCount + 1,
-    category: ["Customer Service", "Teller"][rand(2)],
-    currentAppointmentID: null
+    category: ["Customer Service", "Teller"][rand(2)]
   };
 }
 
@@ -132,23 +135,47 @@ function createRandomAppointment(): DeepPartial<Appointment> {
 
   const { startTime, endTime } = generateRandomTimeSlot();
   const date = faker.date.anytime();
+  const reservationType = [ReservationType.OFFLINE, ReservationType.ONLINE][
+    rand(2)
+  ] as Appointment["reservationType"];
+
+  const [startHour, startMinute] = startTime.split(":").map((n) => parseInt(n));
+
+  const scheduledDate = moment(date)
+    .set("hour", startHour)
+    .set("minute", startMinute);
+
+  const randomScheduledDate = faker.date.between({
+    from: scheduledDate.clone().subtract(2, "hour").toDate(),
+    to: scheduledDate.toDate()
+  });
+
+  const randomArrivalDate = faker.date.between({
+    from: moment(randomScheduledDate).subtract(0.5, "hour").toDate(),
+    to: moment(randomScheduledDate).add(0.5, "hour").toDate()
+  });
 
   return {
     id: faker.string.uuid(),
-    bank: service.bank,
+    bank: window.bank,
     branch: window.branch,
     service: service,
     customer: customer,
     window: window,
     employee: employee,
+    appointmentScheduledTimestamp:
+      reservationType === ReservationType.OFFLINE
+        ? undefined
+        : randomScheduledDate,
+    appointmentArrivalTimestamp: randomArrivalDate,
     appointmentStartDate: date,
     appointmentStartTime: startTime,
     appointmentEndDate: date,
     appointmentEndTime: endTime,
-    status: AppointmentStatus.COMPLETED,
-    reservationType: ["Offline", "Online"][
+    status: [AppointmentStatus.COMPLETED, AppointmentStatus.PENDING][
       rand(2)
-    ] as Appointment["reservationType"]
+    ] as Appointment["status"],
+    reservationType
   };
 }
 
@@ -172,7 +199,7 @@ function createRandomFeedback(): DeepPartial<Feedback> {
 }
 
 const banks = faker.helpers.multiple(createRandomBank, { count: 5 });
-const branches = faker.helpers.multiple(createRandomBranches, { count: 30 });
+const branches = faker.helpers.multiple(createRandomBranches, { count: 10 });
 const customers = faker.helpers.multiple(createRandomCustomer, { count: 150 });
 let windows: DeepPartial<Window>[] = [];
 windows = faker.helpers.multiple(createRandomWindow, { count: 600 });
@@ -239,6 +266,7 @@ async function start() {
   Container.set("db", db);
 
   await generateData();
+  await db.destroy();
 }
 
 start();

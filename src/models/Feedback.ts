@@ -4,7 +4,9 @@ import {
   Column,
   ManyToOne,
   CreateDateColumn,
-  UpdateDateColumn
+  UpdateDateColumn,
+  OneToOne,
+  JoinColumn
 } from "typeorm";
 import { Appointment } from "./Appointment";
 import { Employee } from "./Employee";
@@ -14,9 +16,10 @@ export class Feedback {
   @PrimaryGeneratedColumn("uuid")
   id!: string;
 
-  @ManyToOne(() => Appointment, (appointment) => appointment.feedback, {
+  @OneToOne(() => Appointment, (appointment) => appointment.feedback, {
     onDelete: "CASCADE"
   })
+  @JoinColumn()
   appointment!: Appointment;
 
   @Column({ type: "integer" })

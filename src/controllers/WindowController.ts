@@ -37,7 +37,7 @@ export class WindowController extends BaseController<Window> {
 
   protected override async getScopedWhere(
     req: Request
-  ): Promise<FindOptionsWhere<Window>> {
+  ): Promise<FindOptionsWhere<Window> | null> {
     const user = (await Container.get(UserService).findById(req.user!.id, {
       bank: true,
       branch: true
@@ -47,6 +47,6 @@ export class WindowController extends BaseController<Window> {
     else if (user.role === UserRole.MANAGER)
       return { branch: { id: user.branch.id } };
 
-    return {};
+    return null;
   }
 }

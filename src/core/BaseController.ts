@@ -73,7 +73,7 @@ export abstract class BaseController<T extends ObjectLiteral> {
    * Retrieves the service instance from the container.
    * @returns The service instance.
    */
-  private get service(): BaseService<T> {
+  protected get service(): BaseService<T> {
     return Container.get(this.serviceClass);
   }
 
@@ -99,7 +99,7 @@ export abstract class BaseController<T extends ObjectLiteral> {
   protected async getScopedWhere(
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     req: Request
-  ): Promise<FindOptionsWhere<T>> {
+  ): Promise<FindOptionsWhere<T> | null> {
     return {};
   }
 
@@ -109,10 +109,13 @@ export abstract class BaseController<T extends ObjectLiteral> {
    * @param res - The response object.
    */
   public async list(req: Request, res: Response): Promise<void> {
-    const entities = await this.service.find(
-      await this.getScopedWhere(req),
-      this.relations
-    );
+    const scopedWhere = await this.getScopedWhere(req);
+
+    const entities =
+      scopedWhere === null
+        ? []
+        : await this.service.find(scopedWhere, this.relations);
+
     res.json({ data: { [this.keyPlural]: entities } });
   }
 
@@ -129,10 +132,12 @@ export abstract class BaseController<T extends ObjectLiteral> {
       return;
     }
 
-    const entity = await this.service.findOne(
-      { ...(await this.getScopedWhere(req)), id },
-      this.relations
-    );
+    const scopedWhere = await this.getScopedWhere(req);
+
+    const entity =
+      scopedWhere === null
+        ? null
+        : await this.service.findOne({ ...scopedWhere, id }, this.relations);
 
     if (!entity) {
       res.status(404).json({ error: { message: "Not found" } });
@@ -233,10 +238,12 @@ export abstract class BaseController<T extends ObjectLiteral> {
     }
 
     try {
-      let entity = await this.service.findOne({
-        ...(await this.getScopedWhere(req)),
-        id
-      });
+      const scopedWhere = await this.getScopedWhere(req);
+
+      let entity =
+        scopedWhere === null
+          ? null
+          : await this.service.findOne({ ...scopedWhere, id });
       if (!entity) {
         res.status(404).json({ error: { message: "Not found" } });
         return;
@@ -264,10 +271,12 @@ export abstract class BaseController<T extends ObjectLiteral> {
       return;
     }
 
-    let entity = await this.service.findOne({
-      ...(await this.getScopedWhere(req)),
-      id
-    });
+    const scopedWhere = await this.getScopedWhere(req);
+
+    let entity =
+      scopedWhere === null
+        ? null
+        : await this.service.findOne({ ...scopedWhere, id });
     if (!entity) {
       res.status(404).json({ error: { message: "Not found" } });
       return;
