@@ -24,7 +24,7 @@ export class FraudPrediction {
   bankId!: string;
 
   @ManyToOne(() => Bank, (bank) => bank.fraudPredictions, { eager: true })
-  @JoinColumn({ name: "bankId" })
+  @JoinColumn()
   bank!: Bank;
 
   @CreateDateColumn()
