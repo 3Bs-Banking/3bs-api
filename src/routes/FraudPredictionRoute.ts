@@ -6,6 +6,8 @@ const app = Router();
 const controller = Container.get(FraudPredictionController);
 
 app.get("/", (req, res) => controller.list(req, res));
+app.get("/count", (req, res) => controller.getCount(req, res));
+app.get("/rate", (req, res) => controller.getRate(req, res));
 app.get("/:id", (req, res) => controller.getId(req, res));
 app.post("/", (req, res) => controller.post(req, res));
 app.patch("/:id", (req, res) => controller.update(req, res));

@@ -6,6 +6,8 @@ const router = Router();
 const controller = Container.get(ChurnPredictionController);
 
 router.get("/", (req, res) => controller.list(req, res));
+router.get("/count", (req, res) => controller.getCount(req, res));
+router.get("/rate", (req, res) => controller.getRate(req, res));
 router.get("/:id", (req, res) => controller.getId(req, res));
 router.post("/", (req, res) => controller.post(req, res));
 router.patch("/:id", (req, res) => controller.update(req, res));

@@ -2,6 +2,7 @@ import { BaseController } from "@/core/BaseController";
 import { ChurnPrediction } from "@/models/ChurnPrediction";
 import { ChurnPredictionService } from "@/services/ChurnPredictionService";
 import { Service } from "typedi";
+import { Request, Response } from "express";
 import { z } from "zod";
 
 @Service()
@@ -58,5 +59,41 @@ export class ChurnPredictionController extends BaseController<ChurnPrediction> {
         })
       })
     });
+  }
+
+  public async getCount(req: Request, res: Response) {
+    const scopedWhere = await this.getScopedWhere(req);
+
+    let count = 0;
+
+    if (scopedWhere !== null)
+      count = await this.service.count({ ...scopedWhere, prediction: "Churn" });
+
+    res.json({ data: { count } });
+  }
+
+  public async getRate(req: Request, res: Response) {
+    const scopedWhere = await this.getScopedWhere(req);
+
+    let churnCount = 0,
+      notChurnCount = 0;
+
+    if (scopedWhere !== null) {
+      churnCount = await this.service.count({
+        ...scopedWhere,
+        prediction: "Churn"
+      });
+      notChurnCount = await this.service.count({
+        ...scopedWhere,
+        prediction: "No Churn"
+      });
+    }
+
+    const denominator = churnCount + notChurnCount;
+
+    let rate = 0;
+    if (denominator !== 0) rate = churnCount / denominator;
+
+    res.json({ data: { rate } });
   }
 }

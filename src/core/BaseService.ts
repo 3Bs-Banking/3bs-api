@@ -129,12 +129,14 @@ export default abstract class BaseService<T extends ObjectLiteral> {
    * Counts entities matching the given options.
    *
    * @param {FindOptionsWhere<T> | FindOptionsWhere<T>[]} options - The search criteria.
+   * @param {FindOptionsRelations<T>} relations - Relations to include
    * @returns {Promise<number>} count of elements
    */
   async count(
-    options: FindOptionsWhere<T> | FindOptionsWhere<T>[]
+    options: FindOptionsWhere<T> | FindOptionsWhere<T>[],
+    relations?: FindOptionsRelations<T>
   ): Promise<number> {
-    const result = await this.repository.count({ where: options });
+    const result = await this.repository.count({ where: options, relations });
     return result;
   }
 
