@@ -1,140 +1,124 @@
-import { Service } from 'typedi';
-import { Repository } from 'typeorm';
-import { InjectRepository } from 'typeorm-typedi-extensions';
 import BaseService from "@/core/BaseService";
-import { PersonalInvestmentRecommendation } from '../models/PersonalInvestmentRecommendation';
+import { Service } from "typedi";
+import { DeepPartial } from "typeorm";
+import { PersonalInvestmentRecommendation } from "@/models/PersonalInvestmentRecommendation";
+import { Customer } from "@/models/Customer";
+import { spawn } from "child_process";
 
 @Service()
 export class PersonalInvestmentRecommendationService extends BaseService<PersonalInvestmentRecommendation> {
-  constructor(
-    @InjectRepository(PersonalInvestmentRecommendation)
-    private readonly pirRepository: Repository<PersonalInvestmentRecommendation>
-  ) {
+  constructor() {
     super(PersonalInvestmentRecommendation);
   }
-  private handleError(message: string, error: any): never {
-    let errorMessage = message;
-    if (error instanceof Error) {
-      errorMessage = `${message}: ${error.message}`;
-    } else if (typeof error === 'string') {
-      errorMessage = `${message}: ${error}`;
-    } else if (error?.message) {
-      errorMessage = `${message}: ${error.message}`;
-    }
-    if (error?.code === '23505' || error?.code === 'ER_DUP_ENTRY') {
-      errorMessage = `${message}: Duplicate record found`;
-    }
-    
-    if (error?.code === '23503') {
-      errorMessage = `${message}: Foreign key constraint violation`;
-    }
-    
-    if (error?.message?.includes('AI') || error?.message?.includes('model')) {
-      errorMessage = `${message}: AI service temporarily unavailable`;
-    }
-    
-    throw new Error(errorMessage);
+  async create(
+  data: DeepPartial<PersonalInvestmentRecommendation> & { customer: Customer }
+): Promise<PersonalInvestmentRecommendation> {
+  const existing = await this.repository.findOne({
+    where: { customer: { id: data.customer.id } }
+  });
+
+  if (existing) {
+    throw new Error("Customer has already submitted the investment questionnaire.");
   }
 
-  async getPersonalRecommendations(customerID?: string): Promise<any[]> {
-  try {
-    const latestUserAssetData = await this.getLatestUserAssetData(customerID);
-    if (!latestUserAssetData.length) {
-      throw new Error('No user asset data found');
-    }
+  const inputData = data.inputData;
 
-    const recommendations = await this.generateAIRecommendations(latestUserAssetData);
-    return recommendations;
-    } catch (error) {
-    this.handleError('Failed to generate personal recommendations', error);
-   }
+  if (!inputData?.investmentCapacity || !inputData?.riskLevel || !inputData?.investmentPerspective) {
+    throw new Error("Missing required questionnaire fields.");
   }
 
-  private async getLatestUserAssetData(customerID?: string): Promise<any[]> {
-    try {
-      const queryBuilder = this.pirRepository.createQueryBuilder('pir');
-      if (customerID) {
-        queryBuilder.where('pir.customerID = :customerID', { customerID });
+  const outputData = await this.generateRecommendations(data.customer.id, inputData.riskLevel);
+
+  const record = this.repository.create({
+    customer: data.customer,
+    inputData,
+    outputData
+  });
+
+  return await this.repository.save(record);
+}
+
+
+  // async create(
+  //   data: DeepPartial<PersonalInvestmentRecommendation> & { customer: Customer }
+  // ): Promise<PersonalInvestmentRecommendation> {
+  //   const existing = await this.repository.findOne({
+  //     where: { customer: { id: data.customer.id } }
+  //   });
+
+  //   if (existing) {
+  //     throw new Error("Customer has already submitted the investment questionnaire.");
+  //   }
+
+  //   const inputData = {
+  //     investmentCapacity: data.inputData?.investmentCapacity,
+  //     riskLevel: data.inputData?.riskLevel,
+  //     investmentPerspective: data.inputData?.investmentPerspective
+  //   };
+
+  //   if (!inputData.investmentCapacity || !inputData.riskLevel || !inputData.investmentPerspective) {
+  //     throw new Error("Missing required questionnaire fields.");
+  //   }
+
+  //   const outputData = await this.generateRecommendations(data.customer.id, inputData.riskLevel);
+
+  //   const record = this.repository.create({
+  //     customer: data.customer,
+  //     inputData,
+  //     outputData
+  //   });
+
+  //   return await this.repository.save(record);
+  // }
+
+  private async generateRecommendations(
+    customerID: string,
+    riskLevel: string
+  ): Promise<Record<string, any>[]> {
+    return Array.from({ length: 5 }, (_, i) => ({
+      UserID: customerID,
+      RiskLevel: riskLevel,
+      Rank: i + 1,
+      ISIN: `ISIN${i + 1}`,
+      AssetType: ["Stock", "Bond", "Mutual Fund", "ETF", "REIT"][i],
+      Sector: ["Technology", "Finance", "Healthcare", "Energy", "Real Estate"][i],
+      Industry: ["Software", "Banking", "Biotech", "Oil & Gas", "Commercial"][i],
+      "ROI (%)": +(Math.random() * 15).toFixed(2)
+    }));
+  }
+
+  /*
+  private async callPythonModel(
+    inputData: Record<string, any>
+  ): Promise<Record<string, any>[]> {
+    return new Promise((resolve, reject) => {
+      try {
+        const py = spawn("python", ["python/investmentModel.py"]);
+        let result = "";
+
+        py.stdout.on("data", (data) => {
+          result += data.toString();
+        });
+
+        py.stderr.on("data", (err) => {
+          reject(err.toString());
+        });
+
+        py.on("close", () => {
+          try {
+            const parsed = JSON.parse(result);
+            resolve(parsed.recommendations);
+          } catch {
+            reject("Failed to parse AI model output");
+          }
+        });
+
+        py.stdin.write(JSON.stringify(inputData));
+        py.stdin.end();
+      } catch (error) {
+        reject("Failed to spawn Python script");
       }
-
-      const records = await queryBuilder.orderBy('pir.timestamp', 'DESC').limit(100).getMany();
-      return records.map(record => ({
-        customerID: record.customerID,
-        ISIN: record.ISIN,
-        riskLevel: record.riskLevel,
-        customerType: record.customerType,
-        investmentCapacity: record.investmentCapacity,
-        transactionType: record.transactionType,
-        profitability: Number(record.profitability),
-        sector: record.sector,
-        industry: record.industry,
-        assetCategory: record.assetCategory,
-        timestamp: this.formatDateToDDMMYYYY(record.timestamp),
-      }));
-    } catch (error) {
-      this.handleError('Failed to retrieve user asset data', error);
-    }
+    });
   }
-
-  private async generateAIRecommendations(userAssetData: any[]): Promise<any[]> {
-    try {
-      return await this.callAIModel(userAssetData);
-    } catch (error) {
-      this.handleError('AI model failed to generate recommendations', error);
-    }
-  }
-
-  private async callAIModel(userAssetData: any[]): Promise<any[]> {
-    // Replace with real AI call
-    // Example structure for when you implement:
-    /*
-    try {
-      const response = await fetch('your-ai-endpoint', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userAssetData })
-      });
-      
-      if (!response.ok) {
-        throw new Error(`AI API error: ${response.status}`);
-      }
-      
-      const result = await response.json();
-      return result.recommendations;
-    } catch (error) {
-      throw new Error(`AI service error: ${error.message}`);
-    }
-    */
-    
-    return [];
-  }
-
-  private formatDateToDDMMYYYY(date: Date): string {
-    const day = date.getDate().toString().padStart(2, '0');
-    const month = (date.getMonth() + 1).toString().padStart(2, '0');
-    const year = date.getFullYear();
-    return `${day}/${month}/${year}`;
-  }
-
-  async getRecommendationsByCustomerId(customerID: string): Promise<PersonalInvestmentRecommendation[]> {
-    try {
-      return await this.pirRepository.find({ 
-        where: { customerID }, 
-        order: { timestamp: 'DESC' } 
-      });
-    } catch (error) {
-      this.handleError(`Failed to retrieve recommendations for customer ${customerID}`, error);
-    }
-  }
-
-  async getLatestRecommendations(limit = 100): Promise<PersonalInvestmentRecommendation[]> {
-    try {
-      return await this.pirRepository.find({ 
-        order: { timestamp: 'DESC' }, 
-        take: limit 
-      });
-    } catch (error) {
-      this.handleError('Failed to retrieve latest recommendations', error);
-    }
-  }
+  */
 }

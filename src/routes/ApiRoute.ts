@@ -15,6 +15,7 @@ import FraudPredictionRoute from "@/routes/FraudPredictionRoute";
 import ChurnPredictionRoute from "@/routes/ChurnPredictionRoute";
 import ForexPredictionRoute from "@/routes/ForexPredictionRoute";
 import { isAuthenticated } from "@/middleware/AuthMiddleware";
+import PersonalInvestmentRecommendationRoutes from "./PersonalInvestmentRecommendationRoutes";
 
 const app = Router();
 
@@ -32,6 +33,8 @@ app.use("/window", isAuthenticated, WindowRoute);
 app.use("/window-to-service", isAuthenticated, WindowToServiceRoute);
 app.use("/fraud-predictions", isAuthenticated, FraudPredictionRoute);
 app.use("/churn-predictions", isAuthenticated, ChurnPredictionRoute);
-app.use("/forex-predictions", ForexPredictionRoute);
+app.use("/forex-predictions", isAuthenticated, ForexPredictionRoute);
+app.use("/pir", PersonalInvestmentRecommendationRoutes);
+
 
 export default app;

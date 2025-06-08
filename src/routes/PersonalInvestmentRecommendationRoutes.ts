@@ -1,9 +1,14 @@
-import { Router } from 'express';
-import { PersonalInvestmentRecommendationController } from '../controllers/PersonalInvestmentRecommendationController';
+import { Router } from "express";
+import Container from "typedi";
+import { PersonalInvestmentRecommendationController } from "@/controllers/PersonalInvestmentRecommendationController";
 
-const router = Router();
-const pirController = new PersonalInvestmentRecommendationController();
-router.get('/', pirController.getPersonalRecommendations);
-router.get('/:customerID', pirController.getCustomerRecommendations);
+const app = Router();
+const controller = Container.get(PersonalInvestmentRecommendationController);
 
-export default router;
+app.get("/", (req, res) => controller.list(req, res));
+app.get("/:recommendation", (req, res) => controller.getId(req, res));
+app.post("/", (req, res) => controller.post(req, res));
+app.patch("/:recommendation", (req, res) => controller.update(req, res));
+app.delete("/:recommendation", (req, res) => controller.delete(req, res));
+
+export default app;

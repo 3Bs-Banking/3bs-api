@@ -1,111 +1,82 @@
-import { Request, Response, NextFunction } from 'express';
-import { Container } from 'typedi';
-import { z } from 'zod';
-import { BaseController } from '@/core/BaseController';
-import { PersonalInvestmentRecommendationService } from '@/services/PersonalInvestmentRecommendationService';
-import { PersonalInvestmentRecommendation } from '@/models/PersonalInvestmentRecommendation';
+import { BaseController } from "@/core/BaseController";
+import { PersonalInvestmentRecommendation } from "@/models/PersonalInvestmentRecommendation";
+import { CustomerService } from "@/services/CustomerService";
+import { PersonalInvestmentRecommendationService } from "@/services/PersonalInvestmentRecommendationService";
+import { Request } from "express";
+import { Response } from "express-serve-static-core";
+import Container, { Service } from "typedi";
+import { FindOptionsWhere } from "typeorm";
+import { z, ZodType } from "zod";
 
-// Zod Schemas
-const GetPersonalRecommendationQuerySchema = z.object({
-  customerID: z.string().min(1, 'Customer ID is required').optional(),
-  limit: z.string().transform(val => parseInt(val)).pipe(z.number().min(1).max(100)).optional().default('5')
-});
-
-const AIRecommendationSchema = z.object({
-  UserID: z.string(),
-  ISIN: z.string(),
-  AssetType: z.string(),
-  Sector: z.string(),
-  Industry: z.string(),
-  ROI: z.number(),
-  Rank: z.number().min(1).max(5),
-  RiskLevel: z.string()
-});
-
-const PersonalRecommendationResponseSchema = z.object({
-  success: z.boolean(),
-  message: z.string(),
-  data: z.object({
-    recommendations: z.array(AIRecommendationSchema),
-    totalCount: z.number(),
-    generatedAt: z.string()
-  })
-});
-
-export type PersonalRecommendationResponse = z.infer<typeof PersonalRecommendationResponseSchema>;
-
+@Service()
 export class PersonalInvestmentRecommendationController extends BaseController<PersonalInvestmentRecommendation> {
-  private readonly pirService: PersonalInvestmentRecommendationService;
+  private formSchema = z.object({
+    customerID: z.string({ required_error: "Customer ID is required" }),
+    ISIN: z.string(),
+    riskLevel: z.string(),
+    customerType: z.string(),
+    investmentCapacity: z.string(),
+    investmentPerspective: z.string(),
+    transactionType: z.string(),
+    profitability: z.number(),
+    sector: z.string(),
+    industry: z.string(),
+    assetCategory: z.string(),
+    timestamp: z.string().transform((val) => new Date(val))
+  });
 
-  constructor() {
-    super(class {} as any, {
-      keySingle: 'recommendation',
-      keyPlural: 'recommendations',
-      schema: AIRecommendationSchema
+  public constructor() {
+    super(PersonalInvestmentRecommendationService, {
+      keySingle: "recommendation",
+      keyPlural: "recommendations",
+      schema: {} as unknown as ZodType<Partial<PersonalInvestmentRecommendation>>
     });
-
-    this.pirService = Container.get(PersonalInvestmentRecommendationService);
-  }
-  // ✅ Added handleError method
-  private handleError(error: unknown, next: NextFunction): void {
-    console.error('PIR Controller Error:', error);
-    next(error);
   }
 
-  getPersonalRecommendations = async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ): Promise<void> => {
-    try {
-      const validatedQuery = GetPersonalRecommendationQuerySchema.parse(req.query);
-      const recommendations = await this.pirService.getPersonalRecommendations(validatedQuery.customerID);
-      const response: PersonalRecommendationResponse = {
-        success: true,
-        message: 'Personal investment recommendations retrieved successfully',
-        data: {
-          recommendations,
-          totalCount: recommendations.length,
-          generatedAt: new Date().toISOString()
-        }
-      };
-      res.status(200).json(response);
-    } catch (error) {
-      this.handleError(error, next);
-    }
+  // protected override async validatePostBody(body: Request["body"]) {
+  //   const parsedBody = await this.formSchema.parseAsync(body);
+
+  //   const customerService = Container.get(CustomerService);
+  //   const customer = await customerService.findById(parsedBody.customerID!);
+  //   if (!customer) throw new Error("Customer not found");
+
+  //   return {
+  //     customer,
+  //     inputData: parsedBody
+  //   };
+  // }
+protected override async validatePostBody(body: Request["body"]) {
+  const parsedBody = await this.formSchema.parseAsync(body);
+
+  const customerService = Container.get(CustomerService);
+  const customer = await customerService.findById(parsedBody.customerID);
+  if (!customer) throw new Error("Customer not found");
+
+  // احفظ كل البيانات في inputData بدون فك أو حذف
+  const { customerID, ...inputData } = parsedBody;
+
+  return {
+    customer,
+    inputData
   };
+}
+  protected override async getScopedWhere(
+    req: Request
+  ): Promise<FindOptionsWhere<PersonalInvestmentRecommendation>> {
+    return { customer: { id: req.user!.id } };
+  }
 
-  getCustomerRecommendations = async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ): Promise<void> => {
+  public async post(req: Request, res: Response<any, Record<string, any>, number>): Promise<void> {
     try {
-      const { customerID } = req.params;
-          if (!customerID) {
-      res.status(400).json({
-        success: false,
-        message: 'Customer ID is required'
-      });
-      return;
-    }
-
-
-
-      const recommendations = await this.pirService.getPersonalRecommendations(customerID);
-      const response: PersonalRecommendationResponse = {
-        success: true,
-        message: `Personal investment recommendations for customer ${customerID} retrieved successfully`,
-        data: {
-          recommendations,
-          totalCount: recommendations.length,
-          generatedAt: new Date().toISOString()
-        }
-      };
-
-      res.status(200).json(response);
+      const parsedBody = await this.validatePostBody(req.body);
+      const entity = await this.service.create(parsedBody);
+      res.status(201).json({ data: { recommendation: entity } });
     } catch (error) {
-      this.handleError(error, next);
+      if (error instanceof Error) {
+        res.status(400).json({ error: { message: error.message } });
+      } else {
+        res.status(500).json({ error: { message: "Internal server error" } });
+      }
     }
-  };
+  }
 }
