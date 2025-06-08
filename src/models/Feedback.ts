@@ -9,6 +9,7 @@ import {
 } from "typeorm";
 import { Appointment } from "./Appointment";
 import { Employee } from "./Employee";
+import { Branch } from "./Branch";
 
 @Entity()
 export class Feedback {
@@ -32,7 +33,12 @@ export class Feedback {
   @ManyToOne(() => Employee, (employee) => employee.feedbacks, {
     onDelete: "SET NULL"
   })
-  employee!: Employee | null;
+  employee!: Employee;
+
+  @ManyToOne(() => Branch, (branch) => branch.feedbacks, {
+    onDelete: "SET NULL"
+  })
+  branch!: Branch;
 
   @CreateDateColumn({ type: "timestamptz" })
   createdAt!: Date;

@@ -36,7 +36,10 @@ export class FeedbackController extends BaseController<Feedback> {
     );
     if (!appointment) throw new Error("Appointment not found");
 
-    parsedBody.employee = appointment.employee;
+    if (appointment.status !== AppointmentStatus.COMPLETED)
+      throw new Error("Appointment must be completed");
+
+    parsedBody.employee = appointment.employee!;
 
     if (parsedBody.employee) {
       const employee = await Container.get(EmployeeService).findById(
