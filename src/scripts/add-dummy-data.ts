@@ -25,6 +25,8 @@ import { AppointmentService } from "@/services/AppointmentService";
 import { FeedbackService } from "@/services/FeedbackService";
 import { WindowService } from "@/services/WindowService";
 import { ServiceService } from "@/services/Service";
+import { User, UserRole } from "@/models/User";
+import { UserService } from "@/services/UserService";
 
 const rand = (x: number) => Math.floor(Math.random() * x);
 
@@ -82,6 +84,35 @@ function createRandomCustomer(): DeepPartial<Customer> {
     homeLatitude: faker.location.latitude(),
     homeLongitude: faker.location.longitude()
   };
+}
+
+function createUsers(): DeepPartial<User>[] {
+  const branch = branches[rand(branches.length)];
+  customers[0].fullName = "Web User";
+  customers[0].email = "web@gmail.com";
+  customers[1].fullName = "Mobile User";
+  customers[1].email = "mobile@gmail.com";
+
+  return [
+    {
+      id: customers[0].id,
+      fullName: customers[0].fullName,
+      email: customers[0].email,
+      password: "web123",
+      bank: branch.bank,
+      branch: branch,
+      role: UserRole.ADMIN
+    },
+    {
+      id: customers[1].id,
+      fullName: customers[1].fullName,
+      email: customers[1].email,
+      password: "mobile123",
+      bank: branch.bank,
+      branch: branch,
+      role: UserRole.CUSTOMER
+    }
+  ];
 }
 
 function createRandomWindow(): DeepPartial<Window> {
@@ -190,26 +221,36 @@ function createRandomFeedback(): DeepPartial<Feedback> {
 
   return {
     id: faker.string.uuid(),
+    branch: appointment.branch,
     appointment: appointment,
     satisfactionRating: faker.number.int({ min: 1, max: 5 }),
     timeResolutionRating: faker.number.int({ min: 1, max: 5 }),
     comment: faker.lorem.text(),
-    employee: appointment.employee
+    employee: appointment.employee!
   };
 }
 
-const banks = faker.helpers.multiple(createRandomBank, { count: 5 });
-const branches = faker.helpers.multiple(createRandomBranches, { count: 10 });
-const customers = faker.helpers.multiple(createRandomCustomer, { count: 150 });
+const banks = faker.helpers.multiple(createRandomBank, { count: 2 });
+const branches = faker.helpers.multiple(createRandomBranches, { count: 4 });
+const customers = faker.helpers.multiple(createRandomCustomer, { count: 50 });
+const users = createUsers();
 let windows: DeepPartial<Window>[] = [];
-windows = faker.helpers.multiple(createRandomWindow, { count: 600 });
-const services = faker.helpers.multiple(createRandomService, { count: 50 });
-const employees = faker.helpers.multiple(createRandomEmployee, { count: 100 });
+windows = faker.helpers.multiple(createRandomWindow, {
+  count: branches.length * 10
+});
+const services = faker.helpers.multiple(createRandomService, {
+  count: banks.length * 10
+});
+const employees = faker.helpers.multiple(createRandomEmployee, {
+  count: branches.length * 20
+});
 const appointments = faker.helpers.multiple(createRandomAppointment, {
-  count: 500
+  count: 600
 });
 let feedbacks: DeepPartial<Feedback>[] = [];
-feedbacks = faker.helpers.multiple(createRandomFeedback, { count: 100 });
+feedbacks = faker.helpers.multiple(createRandomFeedback, {
+  count: Math.floor(appointments.length * 0.2)
+});
 
 async function generateData() {
   const bankService = Container.get(BankService);
@@ -220,37 +261,42 @@ async function generateData() {
   const feedbackService = Container.get(FeedbackService);
   const windowService = Container.get(WindowService);
   const serviceService = Container.get(ServiceService);
+  const userService = Container.get(UserService);
 
   try {
-    console.log("Inserting banks");
+    console.log("Inserting banks -", banks.length);
     await bankService.createBatch(banks);
 
     // Insert Branches
-    console.log("Inserting branches");
+    console.log("Inserting branches -", branches.length);
     await branchService.createBatch(branches);
 
     // Insert Customers
-    console.log("Inserting customers");
+    console.log("Inserting customers -", customers.length);
     await customerService.createBatch(customers);
 
+    // Insert Users
+    console.log("Inserting users -", users.length);
+    await userService.createBatch(users);
+
     // Insert Employees
-    console.log("Inserting employees");
+    console.log("Inserting employees -", employees.length);
     await employeeService.createBatch(employees);
 
     // Insert Services
-    console.log("Inserting services");
+    console.log("Inserting services -", services.length);
     await serviceService.createBatch(services);
 
     // Insert Windows
-    console.log("Inserting windows");
+    console.log("Inserting windows -", windows.length);
     await windowService.createBatch(windows);
 
     // Insert Appointments
-    console.log("Inserting appointments");
+    console.log("Inserting appointments -", appointments.length);
     await appointmentService.createBatch(appointments);
 
     // Insert Feedbacks
-    console.log("Inserting feedbacks");
+    console.log("Inserting feedbacks -", feedbacks.length);
     await feedbackService.createBatch(feedbacks);
 
     console.log("All data has been successfully inserted.");
@@ -260,13 +306,25 @@ async function generateData() {
 }
 
 async function start() {
-  console.log("Initializing DB");
-  await db.initialize();
-  console.log(`Connected to DB: ${db.driver.database}`);
-  Container.set("db", db);
+  try {
+    console.log("Initializing DB");
+    await db.initialize();
+    console.log(`Connected to DB: ${db.driver.database}`);
+    console.log("Dropping database");
+    await db.dropDatabase();
+    await db.destroy();
+    console.log("Reinitializing DB");
+    await db.initialize();
 
-  await generateData();
-  await db.destroy();
+    console.log(`Connected to DB: ${db.driver.database}`);
+    Container.set("db", db);
+
+    await generateData();
+  } catch (error) {
+    console.error(error);
+  } finally {
+    await db.destroy();
+  }
 }
 
 start();
