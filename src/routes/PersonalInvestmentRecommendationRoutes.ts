@@ -10,7 +10,11 @@ const controller = Container.get(PersonalInvestmentRecommendationController);
 // Body: { customerID, riskLevel, investmentCapacity }
 app.post("/", (req, res) => controller.post(req, res));
 
+// GET latest recommendation for a customer (GET)
+// Query parameter: customerID
+app.get("/latest", (req, res) => controller.getLatest(req, res));
+
 // Note: Frontend will retrieve data directly from database
-// No GET, PUT, DELETE endpoints needed
+// No PUT, DELETE endpoints needed
 
 export default app;

@@ -135,6 +135,27 @@ export class PersonalInvestmentRecommendationService extends BaseService<Persona
   }
 
   /**
+   * Find latest submission by customer ID
+   */
+  async findLatestByCustomerId(customerId: string): Promise<PersonalInvestmentRecommendation | null> {
+    console.log(`[InvestmentRecommendation] Finding latest submission for customer: ${customerId}`);
+    
+    const latest = await this.repository.findOne({
+      where: { customer: { id: customerId } },
+      relations: ["customer"],
+      order: { timestamp: "DESC" } // Most recent first
+    });
+
+    if (latest) {
+      console.log(`[InvestmentRecommendation] Found latest submission for customer ${customerId}: ${latest.id}`);
+    } else {
+      console.log(`[InvestmentRecommendation] No submissions found for customer: ${customerId}`);
+    }
+
+    return latest;
+  }
+
+  /**
    * Generate investment recommendations by sending classified data to ML model
    */
   private async generateRecommendations(

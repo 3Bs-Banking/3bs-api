@@ -37,6 +37,11 @@ export class PersonalInvestmentRecommendationController extends BaseController<P
     ]).refine(val => val > 0, { message: "Investment capacity must be greater than 0" })
   });
 
+  // Schema for getting latest recommendation
+  private getLatestSchema = z.object({
+    customerID: z.string({ required_error: "Customer ID is required" })
+  });
+
   public constructor() {
     super(PersonalInvestmentRecommendationService, {
       keySingle: "recommendation",
@@ -155,6 +160,67 @@ export class PersonalInvestmentRecommendationController extends BaseController<P
         } else {
           res.status(400).json({ error: { message: error.message } });
         }
+      } else {
+        res.status(500).json({ error: { message: "Internal server error" } });
+      }
+    }
+  }
+
+  /**
+   * GET latest recommendation for a customer (GET)
+   */
+  public async getLatest(req: Request, res: Response<any, Record<string, any>, number>): Promise<void> {
+    try {
+      console.log("[InvestmentRecommendation] Processing get latest recommendation request");
+      
+      const parsedQuery = await this.getLatestSchema.parseAsync(req.query);
+      
+      // Verify customer exists
+      const customerService = Container.get(CustomerService);
+      const customer = await customerService.findById(parsedQuery.customerID);
+      if (!customer) {
+        res.status(404).json({ 
+          error: { 
+            message: "Customer not found",
+            code: "CUSTOMER_NOT_FOUND"
+          } 
+        });
+        return;
+      }
+
+      const service = Container.get(PersonalInvestmentRecommendationService);
+      const latestRecommendation = await service.findLatestByCustomerId(parsedQuery.customerID);
+      
+      if (!latestRecommendation) {
+        console.log(`[InvestmentRecommendation] No recommendations found for customer: ${parsedQuery.customerID}`);
+        res.status(404).json({ 
+          error: { 
+            message: "No investment recommendations found for this customer",
+            code: "NO_RECOMMENDATIONS_FOUND"
+          } 
+        });
+        return;
+      }
+
+      console.log(`[InvestmentRecommendation] Found latest recommendation for customer: ${parsedQuery.customerID}`);
+      
+      res.status(200).json({ 
+        data: { 
+          recommendation: {
+            id: latestRecommendation.id,
+            customer: latestRecommendation.customer,
+            inputData: latestRecommendation.inputData,
+            outputData: latestRecommendation.outputData,
+            timestamp: latestRecommendation.timestamp
+          }
+        },
+        message: "Latest investment recommendation retrieved successfully"
+      });
+    } catch (error) {
+      console.error("[InvestmentRecommendation] Error getting latest recommendation:", error);
+      
+      if (error instanceof Error) {
+        res.status(400).json({ error: { message: error.message } });
       } else {
         res.status(500).json({ error: { message: "Internal server error" } });
       }
