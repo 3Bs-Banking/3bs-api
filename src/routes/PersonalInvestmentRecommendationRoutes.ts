@@ -5,10 +5,12 @@ import { PersonalInvestmentRecommendationController } from "@/controllers/Person
 const app = Router();
 const controller = Container.get(PersonalInvestmentRecommendationController);
 
-app.get("/", (req, res) => controller.list(req, res));
-app.get("/:recommendation", (req, res) => controller.getId(req, res));
+// SUBMIT questionnaire (POST) - Allows multiple submissions per customer
+// Only prevents exact duplicates
+// Body: { customerID, riskLevel, investmentCapacity }
 app.post("/", (req, res) => controller.post(req, res));
-app.patch("/:recommendation", (req, res) => controller.update(req, res));
-app.delete("/:recommendation", (req, res) => controller.delete(req, res));
+
+// Note: Frontend will retrieve data directly from database
+// No GET, PUT, DELETE endpoints needed
 
 export default app;

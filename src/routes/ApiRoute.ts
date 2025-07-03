@@ -24,7 +24,7 @@ app.use("/bank", isAuthenticated, BankRoute);
 app.use("/user", isAuthenticated, UserRoute);
 app.use("/appointment",  AppointmentRoute);
 app.use("/branch", isAuthenticated, BranchRoute);
-app.use("/customer", isAuthenticated, CustomerRoute);
+app.use("/customer", CustomerRoute);
 app.use("/employee", isAuthenticated, EmployeeRoute);
 app.use("/feedback", isAuthenticated, FeedbackRoute);
 app.use("/service", isAuthenticated, ServiceRoute);
@@ -33,7 +33,7 @@ app.use("/window", isAuthenticated, WindowRoute);
 app.use("/window-to-service", isAuthenticated, WindowToServiceRoute);
 app.use("/fraud-predictions", isAuthenticated, FraudPredictionRoute);
 app.use("/churn-predictions", isAuthenticated, ChurnPredictionRoute);
-app.use("/forex-predictions", isAuthenticated, ForexPredictionRoute);
+app.use("/forex-predictions", ForexPredictionRoute);
 app.use("/pir", PersonalInvestmentRecommendationRoutes);
 
 

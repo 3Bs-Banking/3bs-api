@@ -19,7 +19,10 @@ async function start() {
 
   app.use("/api", apiRoute);
 
-  // startForexSchedule();
+  // Start the forex scheduler
+  console.log("Starting Forex Price Scheduler...");
+  startForexSchedule();
+  console.log("Forex Price Scheduler started successfully");
 
   app.listen(process.env.PORT || 5000, () => {
     console.log(
@@ -28,4 +31,7 @@ async function start() {
   });
 }
 
-start();
+start().catch((error) => {
+  console.error("Failed to start server:", error);
+  process.exit(1);
+});
