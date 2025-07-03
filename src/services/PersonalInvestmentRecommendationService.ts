@@ -217,8 +217,8 @@ export class PersonalInvestmentRecommendationService extends BaseService<Persona
     switch (customerType) {
       case "Premium":
         strategy = {
-          assetTypes: ["Private Equity", "Hedge Fund", "Alternative Investment", "Structured Product", "Exclusive REIT"],
-          sectors: ["Private Markets", "Luxury Assets", "Real Estate", "International Markets", "Commodities"],
+          assetTypes: ["Growth Stock", "Investment Fund", "Corporate Bond"],
+          sectors: ["Technology", "Healthcare", "Finance", "International Markets", "Energy"],
           roiRange: { min: 85, max: 97.4 }, // Top tier: 85% - 97.4%
           riskAdjustment: 1.0
         };
@@ -226,8 +226,8 @@ export class PersonalInvestmentRecommendationService extends BaseService<Persona
 
       case "Professional":
         strategy = {
-          assetTypes: ["Growth Stock", "Sector ETF", "International Fund", "Small Cap Stock", "Derivatives"],
-          sectors: ["Technology", "Biotechnology", "Fintech", "Clean Energy", "Emerging Markets"],
+          assetTypes: ["Growth Stock", "Investment Fund", "Corporate Bond"],
+          sectors: ["Technology", "Healthcare", "Finance", "Clean Energy", "Emerging Markets"],
           roiRange: { min: 70, max: 88 }, // High tier: 70% - 88%
           riskAdjustment: 1.0
         };
@@ -235,7 +235,7 @@ export class PersonalInvestmentRecommendationService extends BaseService<Persona
 
       case "Mass":
         strategy = {
-          assetTypes: ["Mutual Fund", "ETF", "Blue Chip Stock", "Corporate Bond", "Index Fund"],
+          assetTypes: ["Investment Fund", "Blue Chip Stock", "Corporate Bond"],
           sectors: ["Technology", "Healthcare", "Finance", "Consumer Goods", "Industrials"],
           roiRange: { min: 55, max: 75 }, // Mid tier: 55% - 75%
           riskAdjustment: 1.0
@@ -244,8 +244,8 @@ export class PersonalInvestmentRecommendationService extends BaseService<Persona
 
       case "Inactive":
         strategy = {
-          assetTypes: ["Government Bond", "Savings Account", "Fixed Deposit", "Treasury Bill", "Money Market"],
-          sectors: ["Government Securities", "Banking", "Utilities", "Consumer Staples", "Stable Income"],
+          assetTypes: ["Government Bond", "Investment Fund", "Blue Chip Stock"],
+          sectors: ["Government Securities", "Banking", "Utilities", "Consumer Staples", "Finance"],
           roiRange: { min: 40, max: 60 }, // Lower tier: 40% - 60%
           riskAdjustment: 1.0
         };
@@ -254,7 +254,7 @@ export class PersonalInvestmentRecommendationService extends BaseService<Persona
       default:
         console.warn(`[InvestmentRecommendation] Unknown customer type: ${customerType}, using Mass strategy`);
         strategy = {
-          assetTypes: ["Mutual Fund", "ETF", "Stock", "Bond", "Index Fund"],
+          assetTypes: ["Investment Fund", "Stock", "Bond"],
           sectors: ["Technology", "Healthcare", "Finance", "Consumer Goods", "Industrials"],
           roiRange: { min: 55, max: 75 },
           riskAdjustment: 1.0
@@ -338,23 +338,17 @@ export class PersonalInvestmentRecommendationService extends BaseService<Persona
     const industryMap: { [key: string]: string[] } = {
       "Technology": ["Software Development", "Cloud Computing", "Cybersecurity", "Artificial Intelligence", "Semiconductors"],
       "Healthcare": ["Pharmaceuticals", "Medical Devices", "Digital Health", "Biotechnology", "Healthcare Services"],
-      "Finance": ["Digital Banking", "Fintech", "Insurance", "Asset Management", "Payment Systems"],
+      "Finance": ["Digital Banking", "Investment Banking", "Insurance", "Asset Management", "Financial Services"],
       "Government Securities": ["Treasury Securities", "Municipal Bonds", "Government Services", "Public Infrastructure", "Sovereign Debt"],
-      "Banking": ["Commercial Banking", "Investment Banking", "Islamic Banking", "Digital Banking", "Microfinance"],
+      "Banking": ["Commercial Banking", "Investment Banking", "Islamic Banking", "Digital Banking", "Financial Services"],
       "Utilities": ["Electric Power", "Water Services", "Gas Distribution", "Renewable Energy", "Telecommunications"],
       "Consumer Staples": ["Food & Beverages", "Personal Care", "Household Products", "Agriculture", "Retail"],
-      "Consumer Goods": ["E-commerce", "Entertainment", "Automotive", "Luxury Goods", "Travel"],
-      "Biotechnology": ["Gene Therapy", "Drug Discovery", "Vaccine Development", "Medical Research", "Biotech Equipment"],
-      "Clean Energy": ["Solar Power", "Wind Energy", "Energy Storage", "Electric Vehicles", "Green Infrastructure"],
-      "Emerging Markets": ["Emerging Asia", "MENA Region", "Latin America", "Frontier Markets", "Developing Economics"],
-      "Real Estate": ["Commercial Real Estate", "Residential Development", "Industrial Properties", "REITs", "Property Management"],
+      "Consumer Goods": ["E-commerce", "Entertainment", "Automotive", "Retail", "Consumer Products"],
       "Industrials": ["Manufacturing", "Construction", "Aerospace", "Transportation", "Industrial Equipment"],
-      "Fintech": ["Digital Payments", "Blockchain", "Cryptocurrency", "Digital Lending", "Robo-Advisory"],
-      "Private Markets": ["Private Equity", "Venture Capital", "Private Debt", "Real Estate Private Equity", "Infrastructure"],
-      "Luxury Assets": ["Art & Collectibles", "Luxury Real Estate", "Wine Investment", "Precious Metals", "Classic Cars"],
-      "International Markets": ["Global Equities", "Foreign Exchange", "International Bonds", "Emerging Markets", "Global REITs"],
-      "Commodities": ["Gold & Precious Metals", "Oil & Gas", "Agricultural Commodities", "Industrial Metals", "Energy Trading"],
-      "Stable Income": ["Fixed Income", "Dividend Stocks", "Income Funds", "Annuities", "CDs"]
+      "Clean Energy": ["Solar Power", "Wind Energy", "Energy Storage", "Renewable Energy", "Green Technology"],
+      "Emerging Markets": ["Emerging Asia", "MENA Region", "Latin America", "Frontier Markets", "Developing Markets"],
+      "International Markets": ["Global Equities", "International Funds", "Global Markets", "Foreign Markets", "International Securities"],
+      "Energy": ["Oil & Gas", "Energy Production", "Energy Distribution", "Renewable Energy", "Energy Services"]
     };
 
     const industries = industryMap[sector] || ["General Industry"];
