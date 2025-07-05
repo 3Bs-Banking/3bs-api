@@ -13,6 +13,7 @@ import { Employee } from "./Employee";
 import { Window } from "./Window";
 import { Appointment } from "./Appointment";
 import { User } from "./User";
+import { Feedback } from "./Feedback";
 
 @Entity()
 export class Branch {
@@ -57,6 +58,9 @@ export class Branch {
 
   @OneToMany(() => Employee, (employee) => employee.branch)
   employees!: Employee[];
+
+  @OneToMany(() => Feedback, (feedback) => feedback.branch)
+  feedbacks!: Feedback[];
 
   @OneToMany(() => Window, (window) => window.branch)
   windows!: Window[];

@@ -4,17 +4,19 @@ import {
   Column,
   ManyToOne,
   CreateDateColumn,
-  UpdateDateColumn
+  UpdateDateColumn,
+  OneToOne
 } from "typeorm";
 import { Appointment } from "./Appointment";
 import { Employee } from "./Employee";
+import { Branch } from "./Branch";
 
 @Entity()
 export class Feedback {
   @PrimaryGeneratedColumn("uuid")
   id!: string;
 
-  @ManyToOne(() => Appointment, (appointment) => appointment.feedback, {
+  @OneToOne(() => Appointment, (appointment) => appointment.feedback, {
     onDelete: "CASCADE"
   })
   appointment!: Appointment;
@@ -31,7 +33,12 @@ export class Feedback {
   @ManyToOne(() => Employee, (employee) => employee.feedbacks, {
     onDelete: "SET NULL"
   })
-  employee!: Employee | null;
+  employee!: Employee;
+
+  @ManyToOne(() => Branch, (branch) => branch.feedbacks, {
+    onDelete: "SET NULL"
+  })
+  branch!: Branch;
 
   @CreateDateColumn({ type: "timestamptz" })
   createdAt!: Date;

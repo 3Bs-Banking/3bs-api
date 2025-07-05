@@ -17,15 +17,20 @@ import { ChurnPrediction } from "@/models/ChurnPrediction";
 import { Session } from "@/models/Session";
 import { ForexPrediction } from "@/models/ForexPrediction";
 import { PersonalInvestmentRecommendation } from "@/models/PersonalInvestmentRecommendation";
+import "@/config/env"; // ✅ THIS LOADS process.env VARIABLES
+import "reflect-metadata";
+console.log("DB_USER:", process.env.DB_USERNAME);
+console.log("DB_PASS:", process.env.DB_PASSWORD);
 export const AppDataSource = new DataSource({
   type: "postgres",
-  // url: process.env.DB_URL,
   host: process.env.DB_HOST || "localhost",
   port: parseInt(process.env.DB_PORT || "5432"),
   username: process.env.DB_USERNAME,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
-  ssl: true,
+  ssl: {
+    rejectUnauthorized: false
+  },
   synchronize: true,
   logging: false,
   entities: [
@@ -43,7 +48,6 @@ export const AppDataSource = new DataSource({
     FraudPrediction,
     ChurnPrediction,
     Session,
-    User,
     ForexPrediction,
     PersonalInvestmentRecommendation
   ],
@@ -51,3 +55,4 @@ export const AppDataSource = new DataSource({
   subscribers: [],
   namingStrategy: new SnakeNamingStrategy()
 });
+
