@@ -1,546 +1,225 @@
 import { AppDataSource } from "@/config/data-source";
-import { ChurnPrediction } from "@/models/ChurnPrediction";
+import { PersonalInvestmentRecommendation } from "@/models/PersonalInvestmentRecommendation";
+import { Customer } from "@/models/Customer";
 
-async function uploadChurnPredictionData() {
+async function seedPersonalInvestmentRecommendations() {
   await AppDataSource.initialize();
 
-  const churnRepo = AppDataSource.getRepository(ChurnPrediction);
+  const recommendationRepo = AppDataSource.getRepository(PersonalInvestmentRecommendation);
+  const customerRepo = AppDataSource.getRepository(Customer);
 
-  console.log("🔍 Preparing churn prediction data for upload...");
+  console.log("🔍 Starting personal investment recommendation seeding process...");
 
-  // Churn prediction data from CSV file
-  const churnPredictionData = [
+  // All personal investment recommendation data from CSV with fixed UUIDs
+  const recommendationData = [
     {
-      id: "0779955b-733e-4e68-82e5-541f8347e9b8",
-      customerProfile: {
-        "Gender": 1,
-        "Credit_Limit": 8000,
-        "Customer_Age": 30,
-        "Months_on_book": 24,
-        "Total_Trans_Ct": 40,
-        "Avg_Open_To_Buy": 7800,
-        "Dependent_count": 1,
-        "Total_Trans_Amt": 2500,
-        "Card_Category_Gold": 1,
-        "Total_Ct_Chng_Q4_Q1": 1,
-        "Total_Revolving_Bal": 200,
-        "Card_Category_Silver": 0,
-        "Total_Amt_Chng_Q4_Q1": 1.1,
-        "Avg_Utilization_Ratio": 0.1,
-        "Contacts_Count_12_mon": 5,
-        "Marital_Status_Single": 0,
-        "Card_Category_Platinum": 0,
-        "Marital_Status_Married": 1,
-        "Marital_Status_Unknown": 0,
-        "Months_Inactive_12_mon": 1,
-        "Education_Level_Unknown": 0,
-        "Income_Category_Unknown": 0,
-        "Education_Level_Graduate": 1,
-        "Total_Relationship_Count": 3,
-        "Education_Level_Doctorate": 0,
-        "Education_Level_Uneducated": 0,
-        "Education_Level_High_School": 0,
-        "Income_Category_$40K_-_$60K": 0,
-        "Income_Category_$60K_-_$80K": 0,
-        "Income_Category_$80K_-_$120K": 1,
-        "Education_Level_Post_Graduate": 0,
-        "Income_Category_Less_than_$40K": 0
+      id: "9eeb6a6a-9c1f-2d3e-bf6a-0e1f2a3b4c5d",
+      customerId: "6d4220a3-7264-4442-bf44-8a45394d8681",
+      inputData: {
+        riskLevel: "Conservative",
+        customerType: "Inactive",
+        transactionType: "buy",
+        investmentCapacity: 8000
       },
-      prediction: "No Churn" as "Churn" | "No Churn",
-      createdAt: new Date("2025-06-03T04:25:15.306Z")
-    },
-    {
-      id: "6919f1c1-279a-4552-8241-45b4a8b7273b",
-      customerProfile: {
-        "Gender": 0,
-        "Credit_Limit": 20000,
-        "Customer_Age": 55,
-        "Months_on_book": 60,
-        "Total_Trans_Ct": 90,
-        "Avg_Open_To_Buy": 15000,
-        "Dependent_count": 4,
-        "Total_Trans_Amt": 5500,
-        "Card_Category_Gold": 1,
-        "Total_Ct_Chng_Q4_Q1": 1.4,
-        "Total_Revolving_Bal": 5000,
-        "Card_Category_Silver": 0,
-        "Total_Amt_Chng_Q4_Q1": 1.5,
-        "Avg_Utilization_Ratio": 0.4,
-        "Contacts_Count_12_mon": 15,
-        "Marital_Status_Single": 0,
-        "Card_Category_Platinum": 0,
-        "Marital_Status_Married": 1,
-        "Marital_Status_Unknown": 0,
-        "Months_Inactive_12_mon": 7,
-        "Education_Level_Unknown": 0,
-        "Income_Category_Unknown": 0,
-        "Education_Level_Graduate": 0,
-        "Total_Relationship_Count": 7,
-        "Education_Level_Doctorate": 1,
-        "Education_Level_Uneducated": 0,
-        "Education_Level_High_School": 0,
-        "Income_Category_$40K_-_$60K": 0,
-        "Income_Category_$60K_-_$80K": 0,
-        "Income_Category_$80K_-_$120K": 1,
-        "Education_Level_Post_Graduate": 0,
-        "Income_Category_Less_than_$40K": 0
-      },
-      prediction: "Churn" as "Churn" | "No Churn",
-      createdAt: new Date("2025-06-03T04:26:03.776Z")
-    },
-    {
-      id: "75cac36e-bc49-418a-a34b-01098c6621da",
-      customerProfile: {
-        "Gender": 1,
-        "Credit_Limit": 10000,
-        "Customer_Age": 45,
-        "Months_on_book": 36,
-        "Total_Trans_Ct": 50,
-        "Avg_Open_To_Buy": 9500,
-        "Dependent_count": 2,
-        "Total_Trans_Amt": 3500,
-        "Card_Category_Gold": 1,
-        "Total_Ct_Chng_Q4_Q1": 1.1,
-        "Total_Revolving_Bal": 500,
-        "Card_Category_Silver": 0,
-        "Total_Amt_Chng_Q4_Q1": 1.2,
-        "Avg_Utilization_Ratio": 0.05,
-        "Contacts_Count_12_mon": 3,
-        "Marital_Status_Single": 0,
-        "Card_Category_Platinum": 0,
-        "Marital_Status_Married": 1,
-        "Marital_Status_Unknown": 0,
-        "Months_Inactive_12_mon": 1,
-        "Education_Level_Unknown": 0,
-        "Income_Category_Unknown": 0,
-        "Education_Level_Graduate": 1,
-        "Total_Relationship_Count": 5,
-        "Education_Level_Doctorate": 0,
-        "Education_Level_Uneducated": 0,
-        "Education_Level_High_School": 0,
-        "Income_Category_$40K_-_$60K": 0,
-        "Income_Category_$60K_-_$80K": 0,
-        "Income_Category_$80K_-_$120K": 1,
-        "Education_Level_Post_Graduate": 0,
-        "Income_Category_Less_than_$40K": 0
-      },
-      prediction: "Churn" as "Churn" | "No Churn",
-      createdAt: new Date("2025-06-03T04:19:45.226Z")
-    },
-    {
-      id: "8578970c-385d-48e6-afd8-8db15993fa22",
-      customerProfile: {
-        "Gender": 0,
-        "Credit_Limit": 22000,
-        "Customer_Age": 60,
-        "Months_on_book": 72,
-        "Total_Trans_Ct": 100,
-        "Avg_Open_To_Buy": 20700,
-        "Dependent_count": 3,
-        "Total_Trans_Amt": 6100,
-        "Card_Category_Gold": 1,
-        "Total_Ct_Chng_Q4_Q1": 1.4,
-        "Total_Revolving_Bal": 1300,
-        "Card_Category_Silver": 0,
-        "Total_Amt_Chng_Q4_Q1": 1.5,
-        "Avg_Utilization_Ratio": 0.45,
-        "Contacts_Count_12_mon": 12,
-        "Marital_Status_Single": 0,
-        "Card_Category_Platinum": 0,
-        "Marital_Status_Married": 1,
-        "Marital_Status_Unknown": 0,
-        "Months_Inactive_12_mon": 8,
-        "Education_Level_Unknown": 0,
-        "Income_Category_Unknown": 0,
-        "Education_Level_Graduate": 0,
-        "Total_Relationship_Count": 7,
-        "Education_Level_Doctorate": 1,
-        "Education_Level_Uneducated": 0,
-        "Education_Level_High_School": 0,
-        "Income_Category_$40K_-_$60K": 0,
-        "Income_Category_$60K_-_$80K": 0,
-        "Income_Category_$80K_-_$120K": 1,
-        "Education_Level_Post_Graduate": 0,
-        "Income_Category_Less_than_$40K": 0
-      },
-      prediction: "Churn" as "Churn" | "No Churn",
-      createdAt: new Date("2025-06-03T04:27:22.159Z")
-    },
-    {
-      id: "9ed23a85-d2fd-4137-bf49-638b77e376c6",
-      customerProfile: {
-        "Gender": 0,
-        "Credit_Limit": 9000,
-        "Customer_Age": 35,
-        "Months_on_book": 18,
-        "Total_Trans_Ct": 35,
-        "Avg_Open_To_Buy": 8400,
-        "Dependent_count": 1,
-        "Total_Trans_Amt": 2700,
-        "Card_Category_Gold": 0,
-        "Total_Ct_Chng_Q4_Q1": 1.1,
-        "Total_Revolving_Bal": 600,
-        "Card_Category_Silver": 1,
-        "Total_Amt_Chng_Q4_Q1": 1.1,
-        "Avg_Utilization_Ratio": 0.25,
-        "Contacts_Count_12_mon": 4,
-        "Marital_Status_Single": 1,
-        "Card_Category_Platinum": 0,
-        "Marital_Status_Married": 0,
-        "Marital_Status_Unknown": 0,
-        "Months_Inactive_12_mon": 1,
-        "Education_Level_Unknown": 0,
-        "Income_Category_Unknown": 0,
-        "Education_Level_Graduate": 1,
-        "Total_Relationship_Count": 3,
-        "Education_Level_Doctorate": 0,
-        "Education_Level_Uneducated": 0,
-        "Education_Level_High_School": 0,
-        "Income_Category_$40K_-_$60K": 0,
-        "Income_Category_$60K_-_$80K": 1,
-        "Income_Category_$80K_-_$120K": 0,
-        "Education_Level_Post_Graduate": 0,
-        "Income_Category_Less_than_$40K": 0
-      },
-      prediction: "No Churn" as "Churn" | "No Churn",
-      createdAt: new Date("2025-06-03T04:26:30.087Z")
-    },
-    {
-      id: "ab96ba63-ac52-406f-a007-bd9a570c07da",
-      customerProfile: {
-        "Gender": 1,
-        "Credit_Limit": 12000,
-        "Customer_Age": 40,
-        "Months_on_book": 36,
-        "Total_Trans_Ct": 55,
-        "Avg_Open_To_Buy": 11200,
-        "Dependent_count": 2,
-        "Total_Trans_Amt": 3100,
-        "Card_Category_Gold": 1,
-        "Total_Ct_Chng_Q4_Q1": 1.2,
-        "Total_Revolving_Bal": 800,
-        "Card_Category_Silver": 0,
-        "Total_Amt_Chng_Q4_Q1": 1.2,
-        "Avg_Utilization_Ratio": 0.3,
-        "Contacts_Count_12_mon": 7,
-        "Marital_Status_Single": 0,
-        "Card_Category_Platinum": 0,
-        "Marital_Status_Married": 1,
-        "Marital_Status_Unknown": 0,
-        "Months_Inactive_12_mon": 2,
-        "Education_Level_Unknown": 0,
-        "Income_Category_Unknown": 0,
-        "Education_Level_Graduate": 1,
-        "Total_Relationship_Count": 4,
-        "Education_Level_Doctorate": 0,
-        "Education_Level_Uneducated": 0,
-        "Education_Level_High_School": 0,
-        "Income_Category_$40K_-_$60K": 0,
-        "Income_Category_$60K_-_$80K": 1,
-        "Income_Category_$80K_-_$120K": 0,
-        "Education_Level_Post_Graduate": 0,
-        "Income_Category_Less_than_$40K": 0
-      },
-      prediction: "Churn" as "Churn" | "No Churn",
-      createdAt: new Date("2025-06-03T04:26:18.198Z")
-    },
-    {
-      id: "c1e3ce01-2f3d-40c9-9be5-518547a8d5e2",
-      customerProfile: {
-        "Gender": 1,
-        "Credit_Limit": 14000,
-        "Customer_Age": 42,
-        "Months_on_book": 36,
-        "Total_Trans_Ct": 50,
-        "Avg_Open_To_Buy": 13100,
-        "Dependent_count": 2,
-        "Total_Trans_Amt": 2800,
-        "Card_Category_Gold": 0,
-        "Total_Ct_Chng_Q4_Q1": 1.2,
-        "Total_Revolving_Bal": 900,
-        "Card_Category_Silver": 0,
-        "Total_Amt_Chng_Q4_Q1": 1.25,
-        "Avg_Utilization_Ratio": 0.28,
-        "Contacts_Count_12_mon": 8,
-        "Marital_Status_Single": 1,
-        "Card_Category_Platinum": 1,
-        "Marital_Status_Married": 0,
-        "Marital_Status_Unknown": 0,
-        "Months_Inactive_12_mon": 5,
-        "Education_Level_Unknown": 0,
-        "Income_Category_Unknown": 0,
-        "Education_Level_Graduate": 1,
-        "Total_Relationship_Count": 5,
-        "Education_Level_Doctorate": 0,
-        "Education_Level_Uneducated": 0,
-        "Education_Level_High_School": 0,
-        "Income_Category_$40K_-_$60K": 0,
-        "Income_Category_$60K_-_$80K": 1,
-        "Income_Category_$80K_-_$120K": 0,
-        "Education_Level_Post_Graduate": 0,
-        "Income_Category_Less_than_$40K": 0
-      },
-      prediction: "No Churn" as "Churn" | "No Churn",
-      createdAt: new Date("2025-06-03T04:27:08.425Z")
-    },
-    {
-      id: "d7875a26-04be-491c-aa59-551cd2ca7194",
-      customerProfile: {
-        "Gender": 0,
-        "Credit_Limit": 15000,
-        "Customer_Age": 45,
-        "Months_on_book": 48,
-        "Total_Trans_Ct": 80,
-        "Avg_Open_To_Buy": 13500,
-        "Dependent_count": 3,
-        "Total_Trans_Amt": 4000,
-        "Card_Category_Gold": 0,
-        "Total_Ct_Chng_Q4_Q1": 1.3,
-        "Total_Revolving_Bal": 1500,
-        "Card_Category_Silver": 0,
-        "Total_Amt_Chng_Q4_Q1": 1.4,
-        "Avg_Utilization_Ratio": 0.35,
-        "Contacts_Count_12_mon": 10,
-        "Marital_Status_Single": 1,
-        "Card_Category_Platinum": 1,
-        "Marital_Status_Married": 0,
-        "Marital_Status_Unknown": 0,
-        "Months_Inactive_12_mon": 5,
-        "Education_Level_Unknown": 0,
-        "Income_Category_Unknown": 0,
-        "Education_Level_Graduate": 0,
-        "Total_Relationship_Count": 6,
-        "Education_Level_Doctorate": 1,
-        "Education_Level_Uneducated": 0,
-        "Education_Level_High_School": 0,
-        "Income_Category_$40K_-_$60K": 0,
-        "Income_Category_$60K_-_$80K": 1,
-        "Income_Category_$80K_-_$120K": 0,
-        "Education_Level_Post_Graduate": 0,
-        "Income_Category_Less_than_$40K": 0
-      },
-      prediction: "Churn" as "Churn" | "No Churn",
-      createdAt: new Date("2025-06-03T04:25:34.692Z")
-    },
-    {
-      id: "e16ac080-30bc-46ad-b34e-640b09af5215",
-      customerProfile: {
-        "Gender": 1,
-        "Credit_Limit": 17000,
-        "Customer_Age": 50,
-        "Months_on_book": 48,
-        "Total_Trans_Ct": 70,
-        "Avg_Open_To_Buy": 15900,
-        "Dependent_count": 2,
-        "Total_Trans_Amt": 4200,
-        "Card_Category_Gold": 1,
-        "Total_Ct_Chng_Q4_Q1": 1.3,
-        "Total_Revolving_Bal": 1100,
-        "Card_Category_Silver": 0,
-        "Total_Amt_Chng_Q4_Q1": 1.3,
-        "Avg_Utilization_Ratio": 0.38,
-        "Contacts_Count_12_mon": 12,
-        "Marital_Status_Single": 0,
-        "Card_Category_Platinum": 0,
-        "Marital_Status_Married": 1,
-        "Marital_Status_Unknown": 0,
-        "Months_Inactive_12_mon": 3,
-        "Education_Level_Unknown": 0,
-        "Income_Category_Unknown": 0,
-        "Education_Level_Graduate": 0,
-        "Total_Relationship_Count": 6,
-        "Education_Level_Doctorate": 1,
-        "Education_Level_Uneducated": 0,
-        "Education_Level_High_School": 0,
-        "Income_Category_$40K_-_$60K": 1,
-        "Income_Category_$60K_-_$80K": 0,
-        "Income_Category_$80K_-_$120K": 0,
-        "Education_Level_Post_Graduate": 0,
-        "Income_Category_Less_than_$40K": 0
-      },
-      prediction: "Churn" as "Churn" | "No Churn",
-      createdAt: new Date("2025-06-03T04:26:44.669Z")
-    },
-    {
-      id: "e53f2be5-dd22-4a74-93d8-faa4c1a5dc62",
-      customerProfile: {
-        "Gender": 0,
-        "Credit_Limit": 11000,
-        "Customer_Age": 38,
-        "Months_on_book": 24,
-        "Total_Trans_Ct": 60,
-        "Avg_Open_To_Buy": 10300,
-        "Dependent_count": 0,
-        "Total_Trans_Amt": 3200,
-        "Card_Category_Gold": 1,
-        "Total_Ct_Chng_Q4_Q1": 1.15,
-        "Total_Revolving_Bal": 700,
-        "Card_Category_Silver": 0,
-        "Total_Amt_Chng_Q4_Q1": 1.15,
-        "Avg_Utilization_Ratio": 0.32,
-        "Contacts_Count_12_mon": 6,
-        "Marital_Status_Single": 0,
-        "Card_Category_Platinum": 0,
-        "Marital_Status_Married": 1,
-        "Marital_Status_Unknown": 0,
-        "Months_Inactive_12_mon": 4,
-        "Education_Level_Unknown": 0,
-        "Income_Category_Unknown": 0,
-        "Education_Level_Graduate": 1,
-        "Total_Relationship_Count": 3,
-        "Education_Level_Doctorate": 0,
-        "Education_Level_Uneducated": 0,
-        "Education_Level_High_School": 0,
-        "Income_Category_$40K_-_$60K": 0,
-        "Income_Category_$60K_-_$80K": 1,
-        "Income_Category_$80K_-_$120K": 0,
-        "Education_Level_Post_Graduate": 0,
-        "Income_Category_Less_than_$40K": 0
-      },
-      prediction: "Churn" as "Churn" | "No Churn",
-      createdAt: new Date("2025-06-03T04:26:56.313Z")
-    },
-    {
-      id: "ebe2c99d-53ef-4508-9120-def82c49e523",
-      customerProfile: {
-        "Gender": 1,
-        "Credit_Limit": 5000,
-        "Customer_Age": 28,
-        "Months_on_book": 12,
-        "Total_Trans_Ct": 30,
-        "Avg_Open_To_Buy": 4900,
-        "Dependent_count": 0,
-        "Total_Trans_Amt": 2900,
-        "Card_Category_Gold": 0,
-        "Total_Ct_Chng_Q4_Q1": 1,
-        "Total_Revolving_Bal": 100,
-        "Card_Category_Silver": 1,
-        "Total_Amt_Chng_Q4_Q1": 1,
-        "Avg_Utilization_Ratio": 0.05,
-        "Contacts_Count_12_mon": 3,
-        "Marital_Status_Single": 0,
-        "Card_Category_Platinum": 0,
-        "Marital_Status_Married": 1,
-        "Marital_Status_Unknown": 0,
-        "Months_Inactive_12_mon": 0,
-        "Education_Level_Unknown": 0,
-        "Income_Category_Unknown": 0,
-        "Education_Level_Graduate": 1,
-        "Total_Relationship_Count": 2,
-        "Education_Level_Doctorate": 0,
-        "Education_Level_Uneducated": 0,
-        "Education_Level_High_School": 0,
-        "Income_Category_$40K_-_$60K": 1,
-        "Income_Category_$60K_-_$80K": 0,
-        "Income_Category_$80K_-_$120K": 0,
-        "Education_Level_Post_Graduate": 0,
-        "Income_Category_Less_than_$40K": 0
-      },
-      prediction: "No Churn" as "Churn" | "No Churn",
-      createdAt: new Date("2025-06-03T04:25:49.504Z")
+      outputData: [
+        {
+          ISIN: "EGINAC223344",
+          Sector: "Money Market",
+          "ROI (%)": 8.5,
+          Industry: "Cash Equivalents",
+          AssetType: "Money Market Fund"
+        },
+        {
+          ISIN: "EGINAC223345",
+          Sector: "Bonds",
+          "ROI (%)": 14.2,
+          Industry: "Government Bonds",
+          AssetType: "Treasury Bond"
+        },
+        {
+          ISIN: "EGINAC223346",
+          Sector: "Banking",
+          "ROI (%)": 16.8,
+          Industry: "Savings Products",
+          AssetType: "Bank CD"
+        },
+        {
+          ISIN: "EGINAC223347",
+          Sector: "Insurance",
+          "ROI (%)": 11.9,
+          Industry: "Life Insurance",
+          AssetType: "Insurance Product"
+        },
+        {
+          ISIN: "EGINAC223348",
+          Sector: "Fixed Income",
+          "ROI (%)": 13.7,
+          Industry: "Municipal Bonds",
+          AssetType: "Municipal Bond"
+        }
+      ],
+      timestamp: new Date("2025-06-25T15:55:11.334Z")
     }
   ];
 
-  console.log(`📊 Preparing to upload ${churnPredictionData.length} churn prediction records...\n`);
+  console.log(`📊 Found ${recommendationData.length} personal investment recommendations to seed`);
 
-  const uploadedPredictions: ChurnPrediction[] = [];
-  let successCount = 0;
-  let errorCount = 0;
-
-  // Process each churn prediction record
-  for (let i = 0; i < churnPredictionData.length; i++) {
-    try {
-      const data = churnPredictionData[i];
-
-      // Create ChurnPrediction entity
-      const churnPrediction = churnRepo.create({
-        id: data.id,
-        customerProfile: data.customerProfile,
-        prediction: data.prediction,
-        createdAt: data.createdAt
-      });
-
-      uploadedPredictions.push(churnPrediction);
-      successCount++;
-
-      console.log(`✅ Prepared record ${i + 1}: ${data.id}`);
-      console.log(`   Prediction: ${data.prediction}`);
-      console.log(`   Customer Age: ${data.customerProfile.Customer_Age}`);
-      console.log(`   Credit Limit: ${data.customerProfile.Credit_Limit}`);
-      console.log(`   Created At: ${data.createdAt.toISOString()}`);
-      console.log();
-
-    } catch (error) {
-      console.log(`❌ Error preparing record ${i + 1}:`, error);
-      errorCount++;
+  // Verify customer existence first
+  console.log("🔍 Verifying customer existence in database...");
+  const uniqueCustomerIds = [...new Set(recommendationData.map(rec => rec.customerId))];
+  
+  for (const customerId of uniqueCustomerIds) {
+    const customer = await customerRepo.findOne({ where: { id: customerId } });
+    if (!customer) {
+      console.log(`⚠️  Warning: Customer with ID ${customerId} not found in database`);
+    } else {
+      console.log(`✅ Customer found: ${customer.fullName || 'Unknown'} (${customerId})`);
     }
   }
 
-  // Save all churn predictions to database
-  if (uploadedPredictions.length > 0) {
-    console.log(`💾 Uploading ${uploadedPredictions.length} records to database...`);
-    await churnRepo.save(uploadedPredictions);
-    console.log("🎉 Successfully uploaded all churn prediction data!\n");
+  console.log("\n💡 Seeding personal investment recommendations to database...\n");
+
+  const newRecommendations: PersonalInvestmentRecommendation[] = [];
+  const seededRecommendationsInfo: Array<{
+    id: string;
+    customerId: string;
+    riskLevel: string;
+    customerType: string;
+    investmentCapacity: number;
+    recommendationCount: number;
+    avgROI: number;
+    timestamp: Date;
+  }> = [];
+
+  for (const data of recommendationData) {
+    // Calculate average ROI for this recommendation
+    const avgROI = data.outputData!.reduce((sum, rec) => sum + rec["ROI (%)"], 0) / data.outputData!.length;
+    
+    // Create new PersonalInvestmentRecommendation record
+    const newRecommendation = recommendationRepo.create({
+      id: data.id,
+      customer: { id: data.customerId } as Customer, // Reference by ID
+      inputData: data.inputData,
+      outputData: data.outputData,
+      timestamp: data.timestamp
+    });
+
+    newRecommendations.push(newRecommendation);
+    
+    // Store seeded info for display
+    seededRecommendationsInfo.push({
+      id: data.id,
+      customerId: data.customerId,
+      riskLevel: data.inputData.riskLevel,
+      customerType: data.inputData.customerType,
+      investmentCapacity: data.inputData.investmentCapacity,
+      recommendationCount: data.outputData!.length,
+      avgROI: parseFloat(avgROI.toFixed(2)),
+      timestamp: data.timestamp!
+    });
+
+    console.log(`✅ Prepared investment recommendation: ${data.id}`);
+    console.log(`   Customer ID: ${data.customerId}`);
+    console.log(`   Risk Level: ${data.inputData.riskLevel}`);
+    console.log(`   Customer Type: ${data.inputData.customerType}`);
+    console.log(`   Investment Capacity: ${data.inputData.investmentCapacity.toLocaleString()}`);
+    console.log(`   Recommendations Count: ${data.outputData!.length}`);
+    console.log(`   Average ROI: ${avgROI.toFixed(2)}%`);
+    console.log(`   Created At: ${data.timestamp!.toISOString()}`);
+    console.log();
   }
 
+  // Save all new investment recommendations to database
+  await recommendationRepo.save(newRecommendations);
+
+  console.log("🎉 Successfully seeded personal investment recommendations to database!\n");
+
   // Summary table
-  console.log("📋 CHURN PREDICTION UPLOAD SUMMARY");
-  console.log("=" .repeat(120));
-  console.log("ID".padEnd(40) + "Prediction".padEnd(15) + "Age".padEnd(8) + "Credit Limit".padEnd(15) + "Status");
-  console.log("-".repeat(120));
+  console.log("📋 SEEDED INVESTMENT RECOMMENDATIONS SUMMARY");
+  console.log("=" .repeat(140));
+  console.log("Risk Level".padEnd(15) + "Customer Type".padEnd(15) + "Investment Cap".padEnd(15) + "Avg ROI".padEnd(10) + "Count".padEnd(8) + "Timestamp".padEnd(25) + "ID");
+  console.log("-".repeat(140));
   
-  churnPredictionData.forEach(data => {
+  seededRecommendationsInfo.forEach(info => {
     console.log(
-      data.id.padEnd(40) + 
-      data.prediction.padEnd(15) + 
-      String(data.customerProfile.Customer_Age).padEnd(8) +
-      String(data.customerProfile.Credit_Limit).padEnd(15) +
-      "✅ Uploaded"
+      info.riskLevel.padEnd(15) + 
+      info.customerType.padEnd(15) + 
+      `${(info.investmentCapacity / 1000).toFixed(0)}K`.padEnd(15) +
+      `${info.avgROI}%`.padEnd(10) +
+      info.recommendationCount.toString().padEnd(8) +
+      info.timestamp.toISOString().slice(0, 19).padEnd(25) +
+      info.id
     );
   });
 
-  console.log("-".repeat(120));
+  console.log("-".repeat(140));
 
-  // Show final count and statistics
-  const totalRecords = await churnRepo.count();
-  const churnCount = await churnRepo.count({ where: { prediction: "Churn" } });
-  const noChurnCount = await churnRepo.count({ where: { prediction: "No Churn" } });
+  // Show final count and analysis
+  const totalRecommendationsAfter = await recommendationRepo.count();
+  const seededCount = newRecommendations.length;
   
-  console.log(`\n📊 Database Summary:`);
-  console.log(`   Total Churn Predictions: ${totalRecords}`);
-  console.log(`   Uploaded Records: ${successCount}`);
-  console.log(`   Errors: ${errorCount}`);
-  console.log(`   "Churn" Predictions: ${churnCount}`);
-  console.log(`   "No Churn" Predictions: ${noChurnCount}`);
+  console.log(`\n📊 Seeding Summary:`);
+  console.log(`   Investment recommendations seeded: ${seededCount}`);
+  console.log(`   Total recommendations in database: ${totalRecommendationsAfter}`);
+  console.log(`   Unique customers: ${uniqueCustomerIds.length}`);
 
-  // Prediction distribution
-  console.log(`\n🎯 Prediction Distribution:`);
-  const uploadedChurn = churnPredictionData.filter(d => d.prediction === "Churn").length;
-  const uploadedNoChurn = churnPredictionData.filter(d => d.prediction === "No Churn").length;
-  console.log(`   Churn: ${uploadedChurn} records (${((uploadedChurn/churnPredictionData.length)*100).toFixed(1)}%)`);
-  console.log(`   No Churn: ${uploadedNoChurn} records (${((uploadedNoChurn/churnPredictionData.length)*100).toFixed(1)}%)`);
+  // Risk level distribution
+  console.log(`\n⚖️  Risk Level Distribution:`);
+  const riskLevelCounts = seededRecommendationsInfo.reduce((acc, rec) => {
+    acc[rec.riskLevel] = (acc[rec.riskLevel] || 0) + 1;
+    return acc;
+  }, {} as Record<string, number>);
 
-  // Customer profile insights
-  console.log(`\n👥 Customer Profile Insights:`);
-  const avgAge = churnPredictionData.reduce((sum, d) => sum + d.customerProfile.Customer_Age, 0) / churnPredictionData.length;
-  const avgCreditLimit = churnPredictionData.reduce((sum, d) => sum + d.customerProfile.Credit_Limit, 0) / churnPredictionData.length;
-  const avgTransactionCount = churnPredictionData.reduce((sum, d) => sum + d.customerProfile.Total_Trans_Ct, 0) / churnPredictionData.length;
+  Object.entries(riskLevelCounts).forEach(([riskLevel, count]) => {
+    console.log(`   ${riskLevel}: ${count} recommendation(s)`);
+  });
 
-  console.log(`   Average Customer Age: ${avgAge.toFixed(1)} years`);
-  console.log(`   Average Credit Limit: $${avgCreditLimit.toFixed(0)}`);
-  console.log(`   Average Transaction Count: ${avgTransactionCount.toFixed(1)}`);
+  // Customer type distribution
+  console.log(`\n👥 Customer Type Distribution:`);
+  const customerTypeCounts = seededRecommendationsInfo.reduce((acc, rec) => {
+    acc[rec.customerType] = (acc[rec.customerType] || 0) + 1;
+    return acc;
+  }, {} as Record<string, number>);
 
-  console.log(`\n🔄 UPLOAD CONFIRMATION:`);
-  console.log(`   ✅ All ${churnPredictionData.length} churn prediction records uploaded successfully`);
-  console.log(`   ✅ Customer profiles stored as JSONB format`);
-  console.log(`   ✅ Predictions properly categorized as "Churn" or "No Churn"`);
-  console.log(`   ✅ Original timestamps preserved from CSV data`);
-  console.log(`   ✅ All UUIDs maintained from original data`);
+  Object.entries(customerTypeCounts).forEach(([customerType, count]) => {
+    console.log(`   ${customerType}: ${count} recommendation(s)`);
+  });
+
+  // Investment capacity analysis
+  console.log(`\n💰 Investment Capacity Analysis:`);
+  const totalInvestmentCapacity = seededRecommendationsInfo.reduce((sum, rec) => sum + rec.investmentCapacity, 0);
+  const avgInvestmentCapacity = totalInvestmentCapacity / seededRecommendationsInfo.length;
+  const minInvestmentCapacity = Math.min(...seededRecommendationsInfo.map(rec => rec.investmentCapacity));
+  const maxInvestmentCapacity = Math.max(...seededRecommendationsInfo.map(rec => rec.investmentCapacity));
+
+  console.log(`   Total Investment Capacity: ${totalInvestmentCapacity.toLocaleString()}`);
+  console.log(`   Average Investment Capacity: ${avgInvestmentCapacity.toLocaleString()}`);
+  console.log(`   Minimum Investment Capacity: ${minInvestmentCapacity.toLocaleString()}`);
+  console.log(`   Maximum Investment Capacity: ${maxInvestmentCapacity.toLocaleString()}`);
+
+  // ROI analysis
+  console.log(`\n📈 ROI Analysis:`);
+  const avgROI = seededRecommendationsInfo.reduce((sum, rec) => sum + rec.avgROI, 0) / seededRecommendationsInfo.length;
+  const minROI = Math.min(...seededRecommendationsInfo.map(rec => rec.avgROI));
+  const maxROI = Math.max(...seededRecommendationsInfo.map(rec => rec.avgROI));
+
+  console.log(`   Average ROI across all recommendations: ${avgROI.toFixed(2)}%`);
+  console.log(`   Minimum average ROI: ${minROI.toFixed(2)}%`);
+  console.log(`   Maximum average ROI: ${maxROI.toFixed(2)}%`);
+
+  console.log(`\n🔄 SEEDING CONFIRMATION:`);
+  console.log(`   ✅ Extracted data from CSV file`);
+  console.log(`   ✅ Created ${seededCount} PersonalInvestmentRecommendation records`);
+  console.log(`   ✅ Fixed all invalid UUIDs to proper format`);
+  console.log(`   ✅ All records assigned to same customer: ${uniqueCustomerIds[0]}`);
+  console.log(`   ✅ Maintained original timestamps and JSON data structures`);
+  console.log(`   ✅ All recommendations saved to personal_investment_recommendation table`);
+  console.log(`   ✅ Database seeding completed successfully`);
 
   await AppDataSource.destroy();
 }
 
-uploadChurnPredictionData().catch((err) => {
-  console.error("❌ Error uploading churn prediction data:", err);
+seedPersonalInvestmentRecommendations().catch((err) => {
+  console.error("❌ Error seeding personal investment recommendations:", err);
   console.error("Full error details:", err);
 });

@@ -3,6 +3,8 @@ import { Service } from "typedi";
 import { DeepPartial } from "typeorm";
 import { PersonalInvestmentRecommendation } from "@/models/PersonalInvestmentRecommendation";
 import { Customer } from "@/models/Customer";
+import Container from "typedi";
+import { CustomerService } from "@/services/CustomerService";
 
 interface ModelInput {
   riskLevel: string;
@@ -17,6 +19,7 @@ interface RecommendationOutput {
   Sector: string;
   Industry: string;
   "ROI (%)": number;
+  recommended: number; // 0 = not recommended, 1 = recommended (highest ROI)
 }
 
 @Service()
@@ -46,7 +49,58 @@ export class PersonalInvestmentRecommendationService extends BaseService<Persona
     }
 
     console.log(`[InvestmentRecommendation] Creating new submission for customer ${data.customer.id}`);
-    return await this.createNewSubmission(data);
+    
+    // NEW: Delete previous recommendations if customer is resubmitting
+    await this.deletePreviousRecommendations(data.customer.id);
+    
+    const result = await this.createNewSubmission(data);
+    
+    // NEW: Update customer questionnaireFilled flag
+    await this.updateCustomerQuestionnaireFlag(data.customer.id);
+    
+    return result;
+  }
+
+  /**
+   * NEW: Delete previous recommendations for customer (Feature #2)
+   */
+  private async deletePreviousRecommendations(customerId: string): Promise<void> {
+    console.log(`[InvestmentRecommendation] Checking for previous recommendations to delete for customer ${customerId}`);
+    
+    const existingRecommendations = await this.repository.find({
+      where: { customer: { id: customerId } }
+    });
+
+    if (existingRecommendations.length > 0) {
+      console.log(`[InvestmentRecommendation] Found ${existingRecommendations.length} previous recommendations to delete`);
+      
+      // Delete all previous recommendations
+      await this.repository.remove(existingRecommendations);
+      
+      console.log(`[InvestmentRecommendation] Successfully deleted ${existingRecommendations.length} previous recommendations`);
+    } else {
+      console.log(`[InvestmentRecommendation] No previous recommendations found for customer ${customerId}`);
+    }
+  }
+
+  /**
+   * NEW: Update customer questionnaireFilled flag (Feature #1)
+   */
+  private async updateCustomerQuestionnaireFlag(customerId: string): Promise<void> {
+    console.log(`[InvestmentRecommendation] Updating questionnaireFilled flag for customer ${customerId}`);
+    
+    const customerService = Container.get(CustomerService);
+    const customer = await customerService.findById(customerId);
+    
+    if (customer) {
+      // Set questionnaireFilled to 1
+      customer.questionnaireFilled = 1;
+      await customerService.update(customerId, { questionnaireFilled: 1 });
+      
+      console.log(`[InvestmentRecommendation] Successfully updated questionnaireFilled flag to 1 for customer ${customerId}`);
+    } else {
+      console.warn(`[InvestmentRecommendation] Customer ${customerId} not found when updating questionnaireFilled flag`);
+    }
   }
 
   /**
@@ -217,7 +271,7 @@ export class PersonalInvestmentRecommendationService extends BaseService<Persona
     switch (customerType) {
       case "Premium":
         strategy = {
-          assetTypes: ["Growth Stock", "Investment Fund", "Corporate Bond"],
+          assetTypes: ["Stock", "Investment Fund", "Bond"],
           sectors: ["Technology", "Healthcare", "Finance", "International Markets", "Energy"],
           roiRange: { min: 85, max: 97.4 }, // Top tier: 85% - 97.4%
           riskAdjustment: 1.0
@@ -226,7 +280,7 @@ export class PersonalInvestmentRecommendationService extends BaseService<Persona
 
       case "Professional":
         strategy = {
-          assetTypes: ["Growth Stock", "Investment Fund", "Corporate Bond"],
+          assetTypes: ["Stock", "Investment Fund", "Bond"],
           sectors: ["Technology", "Healthcare", "Finance", "Clean Energy", "Emerging Markets"],
           roiRange: { min: 70, max: 88 }, // High tier: 70% - 88%
           riskAdjustment: 1.0
@@ -235,7 +289,7 @@ export class PersonalInvestmentRecommendationService extends BaseService<Persona
 
       case "Mass":
         strategy = {
-          assetTypes: ["Investment Fund", "Blue Chip Stock", "Corporate Bond"],
+          assetTypes: ["Investment Fund", "Stock", "Bond"],
           sectors: ["Technology", "Healthcare", "Finance", "Consumer Goods", "Industrials"],
           roiRange: { min: 55, max: 75 }, // Mid tier: 55% - 75%
           riskAdjustment: 1.0
@@ -244,7 +298,7 @@ export class PersonalInvestmentRecommendationService extends BaseService<Persona
 
       case "Inactive":
         strategy = {
-          assetTypes: ["Government Bond", "Investment Fund", "Blue Chip Stock"],
+          assetTypes: ["Bond", "Investment Fund", "Stock"],
           sectors: ["Government Securities", "Banking", "Utilities", "Consumer Staples", "Finance"],
           roiRange: { min: 40, max: 60 }, // Lower tier: 40% - 60%
           riskAdjustment: 1.0
@@ -268,15 +322,33 @@ export class PersonalInvestmentRecommendationService extends BaseService<Persona
     // Generate 5 varied ROI values in descending order (highest first)
     const roiValues = this.generateDescendingROIValues(strategy.roiRange.min, strategy.roiRange.max);
 
-    return Array.from({ length: 5 }, (_, i) => {
+    const recommendations = Array.from({ length: 5 }, (_, i) => {
       return {
         ISIN: `EG${customerType.toUpperCase().slice(0, 3)}${Date.now().toString().slice(-4)}${(i + 1).toString().padStart(2, '0')}`,
         AssetType: strategy.assetTypes[i % strategy.assetTypes.length],
         Sector: strategy.sectors[i % strategy.sectors.length],
         Industry: this.getIndustryBySector(strategy.sectors[i % strategy.sectors.length]),
-        "ROI (%)": roiValues[i]
+        "ROI (%)": roiValues[i],
+        recommended: 0 // Default to not recommended
       };
     });
+
+    // Sort recommendations by ROI in descending order (highest first) to ensure proper ordering
+    recommendations.sort((a, b) => b["ROI (%)"] - a["ROI (%)"]);
+    
+    console.log(`[InvestmentRecommendation] Sorted recommendations by ROI (highest first):`);
+    recommendations.forEach((rec, index) => {
+      console.log(`[InvestmentRecommendation] ${index + 1}. ISIN: ${rec.ISIN}, ROI: ${rec["ROI (%)"]}%, AssetType: ${rec.AssetType}`);
+    });
+
+    // NEW: Set the recommendation with highest ROI as recommended (Feature #3)
+    // After sorting, the first one definitely has the highest ROI
+    if (recommendations.length > 0) {
+      recommendations[0].recommended = 1;
+      console.log(`[InvestmentRecommendation] Set highest ROI recommendation as recommended: ISIN ${recommendations[0].ISIN} with ${recommendations[0]["ROI (%)"]}% ROI (1st position)`);
+    }
+
+    return recommendations;
   }
 
   /**

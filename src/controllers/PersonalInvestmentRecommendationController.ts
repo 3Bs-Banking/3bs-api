@@ -65,6 +65,7 @@ export class PersonalInvestmentRecommendationController extends BaseController<P
     console.log(`[InvestmentRecommendation] Valid submission request for customer: ${customer.id}`);
     console.log(`[InvestmentRecommendation] Investment capacity: ${parsedBody.investmentCapacity} EGP`);
     console.log(`[InvestmentRecommendation] Risk level: ${parsedBody.riskLevel}`);
+    console.log(`[InvestmentRecommendation] Current questionnaireFilled flag: ${customer.questionnaireFilled}`);
 
     // SMART CLASSIFICATION
     const customerType = this.classifyCustomerType(parsedBody.riskLevel, parsedBody.investmentCapacity);
@@ -122,7 +123,7 @@ export class PersonalInvestmentRecommendationController extends BaseController<P
   }
 
   /**
-   * SUBMIT questionnaire (POST) - Allows multiple submissions, prevents exact duplicates
+   * SUBMIT questionnaire (POST) - Enhanced with new features
    */
   public override async post(req: Request, res: Response<any, Record<string, any>, number>): Promise<void> {
     try {
@@ -130,36 +131,41 @@ export class PersonalInvestmentRecommendationController extends BaseController<P
       
       const parsedBody = await this.validateSubmissionBody(req.body);
       const service = Container.get(PersonalInvestmentRecommendationService);
-      const entity = await service.create(parsedBody);
       
-      console.log(`[InvestmentRecommendation] Successfully created questionnaire submission for customer: ${entity.customer.id}`);
+      // Check if customer is resubmitting
+      const isResubmission = parsedBody.customer.questionnaireFilled === 1;
+      console.log(`[InvestmentRecommendation] Customer resubmission status: ${isResubmission ? 'Yes' : 'No'}`);
       
+      // This will:
+      // 1. Delete old recommendations if resubmitting 
+      // 2. Create new recommendation with recommended flags
+      // 3. Update customer questionnaireFilled flag to 1
+      const recommendation = await service.create(parsedBody);
+      
+      console.log(`[InvestmentRecommendation] Successfully created recommendation with ${recommendation.outputData.length} items for customer: ${parsedBody.customer.id}`);
+      
+      // Enhanced success message
+      const successMessage = isResubmission 
+        ? "Investment questionnaire resubmitted successfully. Previous recommendations have been replaced with new ones."
+        : "Investment questionnaire submitted successfully. Your personalized recommendations are ready.";
+
       res.status(201).json({ 
         data: { 
           recommendation: {
-            id: entity.id,
-            customer: entity.customer,
-            inputData: entity.inputData,
-            outputData: entity.outputData,
-            timestamp: entity.timestamp
+            id: recommendation.id,
+            customer: recommendation.customer,
+            inputData: recommendation.inputData,
+            outputData: recommendation.outputData, // Array with recommended flags (1 for highest ROI, 0 for others)
+            timestamp: recommendation.timestamp
           }
         },
-        message: "Investment questionnaire submitted successfully"
+        message: successMessage
       });
     } catch (error) {
       console.error("[InvestmentRecommendation] Error submitting questionnaire:", error);
       
       if (error instanceof Error) {
-        if (error.message.includes("already submitted a questionnaire with these exact same preferences")) {
-          res.status(409).json({ 
-            error: { 
-              message: error.message,
-              code: "DUPLICATE_SUBMISSION"
-            } 
-          });
-        } else {
-          res.status(400).json({ error: { message: error.message } });
-        }
+        res.status(400).json({ error: { message: error.message } });
       } else {
         res.status(500).json({ error: { message: "Internal server error" } });
       }
@@ -167,7 +173,7 @@ export class PersonalInvestmentRecommendationController extends BaseController<P
   }
 
   /**
-   * GET latest recommendation for a customer (GET)
+   * GET latest recommendation for a customer (GET) - Enhanced validation and response
    */
   public async getLatest(req: Request, res: Response<any, Record<string, any>, number>): Promise<void> {
     try {
@@ -188,6 +194,20 @@ export class PersonalInvestmentRecommendationController extends BaseController<P
         return;
       }
 
+      console.log(`[InvestmentRecommendation] Customer found: ${customer.id}, questionnaireFilled: ${customer.questionnaireFilled}`);
+
+      // Check if customer has filled questionnaire
+      if (customer.questionnaireFilled === 0) {
+        console.log(`[InvestmentRecommendation] Customer ${customer.id} has not filled questionnaire yet`);
+        res.status(404).json({ 
+          error: { 
+            message: "Customer has not filled the investment questionnaire yet",
+            code: "QUESTIONNAIRE_NOT_FILLED"
+          } 
+        });
+        return;
+      }
+
       const service = Container.get(PersonalInvestmentRecommendationService);
       const latestRecommendation = await service.findLatestByCustomerId(parsedQuery.customerID);
       
@@ -203,14 +223,15 @@ export class PersonalInvestmentRecommendationController extends BaseController<P
       }
 
       console.log(`[InvestmentRecommendation] Found latest recommendation for customer: ${parsedQuery.customerID}`);
-      
+      console.log(`[InvestmentRecommendation] Recommendation contains ${latestRecommendation.outputData.length} items`);
+
       res.status(200).json({ 
         data: { 
           recommendation: {
             id: latestRecommendation.id,
             customer: latestRecommendation.customer,
             inputData: latestRecommendation.inputData,
-            outputData: latestRecommendation.outputData,
+            outputData: latestRecommendation.outputData, // Array with recommended flags
             timestamp: latestRecommendation.timestamp
           }
         },

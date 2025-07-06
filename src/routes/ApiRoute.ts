@@ -32,7 +32,7 @@ app.use("/setting", isAuthenticated, SettingRoute);
 app.use("/window", isAuthenticated, WindowRoute);
 app.use("/window-to-service", isAuthenticated, WindowToServiceRoute);
 app.use("/fraud-predictions", isAuthenticated, FraudPredictionRoute);
-app.use("/churn-predictions", isAuthenticated, ChurnPredictionRoute);
+app.use("/churn-predictions", ChurnPredictionRoute);
 app.use("/forex-predictions", ForexPredictionRoute);
 app.use("/pir", PersonalInvestmentRecommendationRoutes);
 
