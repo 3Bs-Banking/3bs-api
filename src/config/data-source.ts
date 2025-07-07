@@ -6,6 +6,7 @@ import { Service } from "../models/Service";
 import { Customer } from "../models/Customer";
 import { Employee } from "../models/Employee";
 import { Window } from "../models/Window";
+import { AccessManagement } from "../models/AccessManagement";
 import { WindowToService } from "../models/WindowToService";
 import { Appointment } from "../models/Appointment";
 import { Feedback } from "../models/Feedback";
@@ -49,7 +50,8 @@ export const AppDataSource = new DataSource({
     ChurnPrediction,
     Session,
     ForexPrediction,
-    PersonalInvestmentRecommendation
+    PersonalInvestmentRecommendation,
+    AccessManagement
   ],
   migrations: [],
   subscribers: [],
