@@ -31,17 +31,24 @@ export class AccessManagementService {
       switch (role) {
         case UserRole.ADMIN:
           if (attempts === 0) {
-            email = `${cleanFirstName}.${cleanLastName}@admin.com`;
+            email = `${cleanFirstName}.${cleanLastName}@bbb.admin.com`;
           } else {
-            email = `${cleanFirstName}.${cleanLastName}${attempts}@admin.com`;
+            email = `${cleanFirstName}.${cleanLastName}${attempts}@bbb.admin.com`;
           }
           break;
         case UserRole.MANAGER:
           const randomNumber = Math.floor(Math.random() * 10);
           if (attempts === 0) {
-            email = `${cleanFirstName}${randomNumber}@manager.com`;
+            email = `${cleanFirstName}.${cleanLastName}${randomNumber}@bbb.manager.com`;
           } else {
-            email = `${cleanFirstName}${randomNumber}${attempts}@manager.com`;
+            email = `${cleanFirstName}.${cleanLastName}${randomNumber}${attempts}@bbb.manager.com`;
+          }
+          break;
+        case UserRole.EMPLOYEE:
+          if (attempts === 0) {
+            email = `${cleanFirstName}.${cleanLastName}@bbb.emp.com`;
+          } else {
+            email = `${cleanFirstName}.${cleanLastName}${attempts}@bbb.emp.com`;
           }
           break;
         case UserRole.CUSTOMER:
@@ -68,9 +75,60 @@ export class AccessManagementService {
     throw new Error('Unable to generate unique email after multiple attempts');
   }
 
-  // Create new user directly (renamed from createAccessRequest)
+  // NEW: Escalate user privileges (UPDATE existing user)
+  async escalateUserPrivileges(data: {
+    employeeId: string;
+    newRole: UserRole;
+    newPassword: string;
+    notes?: string;
+    escalatedById: string;
+  }): Promise<User> {
+    const { employeeId, newRole, newPassword, escalatedById } = data;
+
+    // Find existing user by ID or email
+    const isEmail = employeeId.includes('@');
+    const existingUser = await this.userRepository.findOne({
+      where: isEmail ? { email: employeeId } : { id: employeeId },
+      relations: ['bank', 'branch']
+    });
+
+    if (!existingUser) {
+      throw new Error('Employee not found');
+    }
+
+    // Validate escalator exists
+    const escalatedBy = await this.userRepository.findOne({ where: { id: escalatedById } });
+    if (!escalatedBy) {
+      throw new Error('Escalator user not found');
+    }
+
+    // Extract first and last name from existing user
+    const nameParts = existingUser.fullName.split(' ');
+    const firstName = nameParts[0];
+    const lastName = nameParts.slice(1).join(' ');
+
+    // Generate new email based on new role
+    const newEmail = await this.generateEmail(firstName, lastName, newRole);
+
+    // Update user with new role, email, and password
+    existingUser.role = newRole;
+    existingUser.email = newEmail;
+    existingUser.password = newPassword; // Will be hashed by @BeforeUpdate hook
+
+    // Save updated user
+    const updatedUser = await this.userRepository.save(existingUser);
+
+    console.log(`✅ User escalated: ${existingUser.fullName}`);
+    console.log(`   🔄 Role: ${existingUser.role} → ${newRole}`);
+    console.log(`   📧 Email: ${existingUser.email} → ${newEmail}`);
+    console.log(`   🔐 Password: Updated`);
+
+    return updatedUser;
+  }
+
+  // Create new user directly (for new employees only)
   async createAccessRequest(data: {
-    employeeId?: string; // Optional employee ID (ignored in processing)
+    employeeId?: string;
     firstName: string;
     lastName: string;
     role: UserRole;
@@ -79,12 +137,10 @@ export class AccessManagementService {
     branchId: string;
     createdById: string;
     notes?: string;
-    email?: string; // Optional custom email
+    email?: string;
   }): Promise<User> {
     
     const { employeeId, firstName, lastName, role, password, bankId, branchId, createdById, email: customEmail } = data;
-
-    // Note: employeeId is ignored since User model uses UUID as primary key
 
     // Validate bank and branch exist
     const bank = await this.bankRepository.findOne({ where: { id: bankId } });
@@ -105,7 +161,6 @@ export class AccessManagementService {
     // Generate or use custom email
     let email: string;
     if (customEmail) {
-      // Check if custom email is unique
       const existingUser = await this.userRepository.findOne({ where: { email: customEmail } });
       if (existingUser) {
         throw new Error('Email already exists');
@@ -129,7 +184,7 @@ export class AccessManagementService {
     return savedUser;
   }
 
-  // Get all users (renamed from getAllAccessRequests)
+  // Get all users
   async getAllAccessRequests(): Promise<User[]> {
     return await this.userRepository.find({
       relations: ['bank', 'branch'],
@@ -137,7 +192,7 @@ export class AccessManagementService {
     });
   }
 
-  // Get user by ID (renamed from getAccessRequestById)
+  // Get user by ID
   async getAccessRequestById(id: string): Promise<User | null> {
     return await this.userRepository.findOne({
       where: { id },
@@ -145,7 +200,7 @@ export class AccessManagementService {
     });
   }
 
-  // Update user role (renamed from approveAccess)
+  // Update user role
   async approveAccess(userId: string, approvedById: string): Promise<User> {
     const user = await this.userRepository.findOne({
       where: { id: userId },
@@ -161,11 +216,10 @@ export class AccessManagementService {
       throw new Error('Approver user not found');
     }
 
-    // User is already created and active, just return it
     return user;
   }
 
-  // Delete user (renamed from rejectAccess)
+  // Delete user
   async rejectAccess(userId: string, approvedById: string, notes?: string): Promise<{ message: string }> {
     const user = await this.userRepository.findOne({ where: { id: userId } });
 
@@ -178,15 +232,12 @@ export class AccessManagementService {
       throw new Error('Approver user not found');
     }
 
-    // Delete the user
     await this.userRepository.remove(user);
-
     return { message: 'User deleted successfully' };
   }
 
-  // Get user by email or ID (renamed from getUserByEmployeeId)
+  // Get user by email or ID
   async getUserByEmployeeId(identifier: string): Promise<any> {
-    // Check if identifier is email or UUID
     const isEmail = identifier.includes('@');
     
     const user = await this.userRepository.findOne({
@@ -222,7 +273,7 @@ export class AccessManagementService {
     bankId?: string;
     branchId?: string;
     email?: string;
-    password?: string; // Added password update option
+    password?: string;
   }): Promise<User> {
     const user = await this.userRepository.findOne({
       where: { id: userId },
@@ -249,14 +300,21 @@ export class AccessManagementService {
       user.email = data.email;
     }
 
-    // Update password if provided (will be hashed by @BeforeUpdate)
+    // Update password if provided
     if (data.password) {
       user.password = data.password;
     }
 
-    // Update role if provided
-    if (data.role) {
+    // Update role if provided - ALSO UPDATE EMAIL IF ROLE CHANGES
+    if (data.role && data.role !== user.role) {
       user.role = data.role;
+      
+      // Regenerate email based on new role (unless custom email provided)
+      if (!data.email) {
+        const firstName = data.firstName || user.fullName.split(' ')[0];
+        const lastName = data.lastName || user.fullName.split(' ').slice(1).join(' ');
+        user.email = await this.generateEmail(firstName, lastName, data.role);
+      }
     }
 
     // Update bank if provided
@@ -293,7 +351,7 @@ export class AccessManagementService {
     return await user.validatePassword(password);
   }
 
-  // Batch create users (renamed from batchApproveAccessRequests)
+  // Batch create users
   async batchApproveAccessRequests(usersData: Array<{
     firstName: string;
     lastName: string;
@@ -354,7 +412,6 @@ export class AccessManagementService {
       throw new Error('User not found');
     }
 
-    // Update password (will be hashed by User model's @BeforeUpdate)
     user.password = newPassword;
     return await this.userRepository.save(user);
   }

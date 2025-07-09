@@ -17,11 +17,13 @@ import ForexPredictionRoute from "@/routes/ForexPredictionRoute";
 import { isAuthenticated } from "@/middleware/AuthMiddleware";
 import PersonalInvestmentRecommendationRoutes from "./PersonalInvestmentRecommendationRoutes";
 import AccessManagementRoute from "@/routes/AccessManagementRoute";
-
-// Add this line in your existing ApiRoute.ts file:
+import UserInfoRoute from "@/routes/UserInfoRoute";
+import temporaryAccessRoutes from "./temporaryAccessRoutes";
 
 const app = Router();
 app.use("/access-management", AccessManagementRoute);
+app.use("/UserInfo", UserInfoRoute);
+app.use("/temporary-access", temporaryAccessRoutes);
 app.use("/auth", AuthRoute);
 app.use("/bank", isAuthenticated, BankRoute);
 app.use("/user", isAuthenticated, UserRoute);

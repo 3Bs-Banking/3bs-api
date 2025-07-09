@@ -4,11 +4,13 @@ import {
   Column,
   ManyToOne,
   OneToMany,
+  OneToOne,
   CreateDateColumn,
   UpdateDateColumn
 } from "typeorm";
 import { Bank } from "./Bank";
 import { Branch } from "./Branch";
+import { User } from "./User";
 import { Appointment } from "./Appointment";
 import { Feedback } from "./Feedback";
 
@@ -24,6 +26,13 @@ export class Employee {
     onDelete: "CASCADE"
   })
   branch!: Branch;
+
+  // One-to-One relation with User (optional - for employees who have user accounts)
+  @OneToOne(() => User, (user) => user.employee, { 
+    nullable: true, 
+    onDelete: "CASCADE" 
+  })
+  user?: User;
 
   @Column({ type: "varchar", length: 255 })
   fullName!: string;

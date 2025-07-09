@@ -5,7 +5,7 @@ import express from "express";
 import cors from "cors";
 import { AppDataSource as db } from "@/config/data-source";
 import apiConfig from "@/config/api";
-import apiRoute from "@/routes/ApiRoute";
+// import apiRoute from "@/routes/ApiRoute";
 import { startForexSchedule } from "@/core/ForexPriceScheduler";
 
 async function start() {
@@ -13,6 +13,7 @@ async function start() {
   await db.initialize();
   console.log(`Connected to DB: ${db.driver.database}`);
   Container.set("db", db);
+  const apiRoute = (await import("@/routes/ApiRoute")).default;
 
   const app = express();
 

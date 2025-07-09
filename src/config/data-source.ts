@@ -20,6 +20,7 @@ import { ForexPrediction } from "@/models/ForexPrediction";
 import { PersonalInvestmentRecommendation } from "@/models/PersonalInvestmentRecommendation";
 import "@/config/env"; // ✅ THIS LOADS process.env VARIABLES
 import "reflect-metadata";
+import { TemporaryAccess } from "@/models/TemporaryAccess";
 console.log("DB_USER:", process.env.DB_USERNAME);
 console.log("DB_PASS:", process.env.DB_PASSWORD);
 export const AppDataSource = new DataSource({
@@ -51,7 +52,8 @@ export const AppDataSource = new DataSource({
     Session,
     ForexPrediction,
     PersonalInvestmentRecommendation,
-    AccessManagement
+    AccessManagement,
+    TemporaryAccess
   ],
   migrations: [],
   subscribers: [],

@@ -20,13 +20,7 @@ export class CustomerController extends BaseController<Customer> {
           .object({ id: z.string().uuid() })
           .nullable()
           .optional()
-      }) as unknown as ZodType<Partial<Customer>>,
-      // ADD THIS LINE - This is what you're missing!
-      relations: { 
-        preferredBranch: { 
-          bank: true 
-        } 
-      }
+      }) as unknown as ZodType<Partial<Customer>>
     });
   }
 }
