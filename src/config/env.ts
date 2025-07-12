@@ -1,5 +1,6 @@
 import { config as dotenvConfig } from "dotenv";
 import { z } from "zod";
+
 dotenvConfig();
 
 const envVariables = z.object({
@@ -9,9 +10,11 @@ const envVariables = z.object({
   DB_USERNAME: z.string(),
   DB_PASSWORD: z.string(),
   DB_NAME: z.string(),
-  PORT: z.string(),
   HOST: z.string(),
+  PORT: z.string(),
   SESSION_SECRET: z.string(),
+  FOREX_API_KEY: z.string(),
+  FOREX_API_URL: z.string(),
   REDIS_URL: z.string(),
   MOBILE_APP_HOST: z.string(),
   WEB_APP_HOST: z.string()

@@ -27,4 +27,36 @@ export class UserController extends BaseController<User> {
 
     res.json({ data: { user: user } });
   }
+
+  public async verifyPassword(req: Request, res: Response): Promise<void> {
+    try {
+      const sessionUser = req.user as { id: string } | undefined;
+      const { password } = req.body;
+      if (!sessionUser) {
+        res.status(401).json({ success: false, message: "Not authenticated" });
+        return;
+      }
+      if (!password) {
+        res.status(400).json({ success: false, message: "Password is required" });
+        return;
+      }
+      // Fetch the full user entity from the DB
+      const userService = Container.get(UserService);
+      const user = await userService.findById(sessionUser.id);
+      if (!user) {
+        res.status(404).json({ success: false, message: "User not found" });
+        return;
+      }
+      const isValid = await user.validatePassword(password);
+      if (isValid) {
+        res.json({ success: true });
+      } else {
+        res.status(401).json({ success: false, message: "Incorrect password" });
+      }
+    } catch (err) {
+      console.error("Password verification error:", err);
+      res.status(500).json({ success: false, message: "Server error verifying password" });
+    }
+  }
+  
 }

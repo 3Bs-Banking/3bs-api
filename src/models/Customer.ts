@@ -35,6 +35,10 @@ export class Customer {
   @Column({ type: "float", nullable: true })
   homeLongitude!: number | null;
 
+  // New flag to track if customer has filled investment questionnaire
+  @Column({ type: "smallint", default: 0 })
+  questionnaireFilled!: number; // 0 = not filled, 1 = filled
+
   @OneToMany(() => Appointment, (appointment) => appointment.customer)
   appointments!: Appointment[];
 

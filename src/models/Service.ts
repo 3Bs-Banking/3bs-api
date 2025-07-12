@@ -13,6 +13,7 @@ import { Appointment } from "./Appointment";
 
 @Entity()
 export class Service {
+  [x: string]: any;
   @PrimaryGeneratedColumn("uuid")
   id!: string;
 

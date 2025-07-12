@@ -13,16 +13,23 @@ import WindowRoute from "@/routes/WindowRoute";
 import WindowToServiceRoute from "@/routes/WindowToServiceRoute";
 import FraudPredictionRoute from "@/routes/FraudPredictionRoute";
 import ChurnPredictionRoute from "@/routes/ChurnPredictionRoute";
+import ForexPredictionRoute from "@/routes/ForexPredictionRoute";
 import { isAuthenticated } from "@/middleware/AuthMiddleware";
+import PersonalInvestmentRecommendationRoutes from "./PersonalInvestmentRecommendationRoutes";
+import AccessManagementRoute from "@/routes/AccessManagementRoute";
+import UserInfoRoute from "@/routes/UserInfoRoute";
+import temporaryAccessRoutes from "./temporaryAccessRoutes";
 
 const app = Router();
-
+app.use("/access-management", AccessManagementRoute);
+app.use("/UserInfo", UserInfoRoute);
+app.use("/temporary-access", temporaryAccessRoutes);
 app.use("/auth", AuthRoute);
 app.use("/bank", isAuthenticated, BankRoute);
 app.use("/user", isAuthenticated, UserRoute);
-app.use("/appointment", isAuthenticated, AppointmentRoute);
+app.use("/appointment",  AppointmentRoute);
 app.use("/branch", isAuthenticated, BranchRoute);
-app.use("/customer", isAuthenticated, CustomerRoute);
+app.use("/customer", CustomerRoute);
 app.use("/employee", isAuthenticated, EmployeeRoute);
 app.use("/feedback", isAuthenticated, FeedbackRoute);
 app.use("/service", isAuthenticated, ServiceRoute);
@@ -30,6 +37,9 @@ app.use("/setting", isAuthenticated, SettingRoute);
 app.use("/window", isAuthenticated, WindowRoute);
 app.use("/window-to-service", isAuthenticated, WindowToServiceRoute);
 app.use("/fraud-predictions", isAuthenticated, FraudPredictionRoute);
-app.use("/churn-predictions", isAuthenticated, ChurnPredictionRoute);
+app.use("/churn-predictions", ChurnPredictionRoute);
+app.use("/forex-predictions", ForexPredictionRoute);
+app.use("/pir", PersonalInvestmentRecommendationRoutes);
+
 
 export default app;
