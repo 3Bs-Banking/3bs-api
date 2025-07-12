@@ -60,12 +60,12 @@ export default abstract class BaseService<T extends ObjectLiteral> {
   /**
    * Finds entities matching the given options.
    *
-   * @param {FindOptionsWhere<T>} options - The search criteria.
+   * @param {FindOptionsWhere<T> | FindOptionsWhere<T>[]} options - The search criteria.
    * @param {FindOptionsRelations<T>} relations - Relations to include
    * @returns {Promise<T[]>} An array of matching entities.
    */
   async find(
-    options: FindOptionsWhere<T>,
+    options: FindOptionsWhere<T> | FindOptionsWhere<T>[],
     relations?: FindOptionsRelations<T>
   ): Promise<T[]> {
     return await this.repository.find({ where: options, relations });
@@ -74,12 +74,12 @@ export default abstract class BaseService<T extends ObjectLiteral> {
   /**
    * Finds entities matching the given options.
    *
-   * @param {FindOptionsWhere<T>} options - The search criteria.
+   * @param {FindOptionsWhere<T> | FindOptionsWhere<T>[]} options - The search criteria.
    * @param {FindOptionsRelations<T>} relations - Relations to include
    * @returns {Promise<T[]>} An array of matching entities.
    */
   async findOne(
-    options: FindOptionsWhere<T>,
+    options: FindOptionsWhere<T> | FindOptionsWhere<T>[],
     relations?: FindOptionsRelations<T>
   ): Promise<T | null> {
     return await this.repository.findOne({ where: options, relations });
@@ -123,5 +123,31 @@ export default abstract class BaseService<T extends ObjectLiteral> {
   async delete(id: string): Promise<boolean> {
     const result = await this.repository.delete(id);
     return result.affected !== 0;
+  }
+
+  /**
+   * Counts entities matching the given options.
+   *
+   * @param {FindOptionsWhere<T> | FindOptionsWhere<T>[]} options - The search criteria.
+   * @param {FindOptionsRelations<T>} relations - Relations to include
+   * @returns {Promise<number>} count of elements
+   */
+  async count(
+    options: FindOptionsWhere<T> | FindOptionsWhere<T>[],
+    relations?: FindOptionsRelations<T>
+  ): Promise<number> {
+    const result = await this.repository.count({ where: options, relations });
+    return result;
+  }
+
+  /**
+   * Perform raw query on database
+   *
+   * @param {string} query - The search criteria.
+   * @param {any[]} parameters - Parameters to be put in SQL placeholders
+   * @returns {Promise<any>} query result
+   */
+  query(query: string, parameters?: any[]): Promise<any> {
+    return this.repository.query(query, parameters);
   }
 }

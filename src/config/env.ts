@@ -14,7 +14,10 @@ const envVariables = z.object({
   PORT: z.string(),
   SESSION_SECRET: z.string(),
   FOREX_API_KEY: z.string(),
-  FOREX_API_URL: z.string()
+  FOREX_API_URL: z.string(),
+  REDIS_URL: z.string(),
+  MOBILE_APP_HOST: z.string(),
+  WEB_APP_HOST: z.string()
 });
 
 envVariables.parse(process.env);

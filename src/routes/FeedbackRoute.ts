@@ -6,6 +6,9 @@ const app = Router();
 const feedbackController = Container.get(FeedbackController);
 
 app.get("/", (req, res) => feedbackController.list(req, res));
+app.get("/check-feedback-needed", (req, res) =>
+  feedbackController.checkFeedbackNeeded(req, res)
+);
 app.get("/:feedback", (req, res) => feedbackController.getId(req, res));
 app.post("/", (req, res) => feedbackController.post(req, res));
 app.patch("/:feedback", (req, res) => feedbackController.update(req, res));

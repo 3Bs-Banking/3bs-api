@@ -1,5 +1,6 @@
 import { BaseController } from "@/core/BaseController";
 import { Setting } from "@/models/Setting";
+import { UserRole } from "@/models/User";
 import { SettingService } from "@/services/SettingService";
 import { UserService } from "@/services/UserService";
 import { Request } from "express";
@@ -24,11 +25,13 @@ export class SettingController extends BaseController<Setting> {
 
   protected override async getScopedWhere(
     req: Request
-  ): Promise<FindOptionsWhere<Setting>> {
+  ): Promise<FindOptionsWhere<Setting> | null> {
     const user = (await Container.get(UserService).findById(req.user!.id, {
       bank: true,
       branch: true
     }))!;
+
+    if (user.role === UserRole.CUSTOMER) return null;
 
     return { bank: { id: user.bank.id } };
   }

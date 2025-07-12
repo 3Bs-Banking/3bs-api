@@ -56,7 +56,7 @@ export class EmployeeController extends BaseController<Employee> {
 
   protected override async getScopedWhere(
     req: Request
-  ): Promise<FindOptionsWhere<Employee>> {
+  ): Promise<FindOptionsWhere<Employee> | null> {
     const user = (await Container.get(UserService).findById(req.user!.id, {
       bank: true,
       branch: true
@@ -66,6 +66,6 @@ export class EmployeeController extends BaseController<Employee> {
     else if (user.role === UserRole.MANAGER)
       return { branch: { id: user.branch.id } };
 
-    return {};
+    return null;
   }
 }

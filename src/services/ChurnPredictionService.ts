@@ -387,6 +387,45 @@ export class ChurnPredictionService extends BaseService<ChurnPrediction> {
       else if (factor.includes("High") || factor.includes("Extended")) score += 10;
       else if (factor.includes("Notable") || factor.includes("Elevated")) score += 7;
       else score += 5;
+
+  private async callPythonModel(
+    customerProfile: Record<string, any>
+  ): Promise<"Churn" | "No Churn"> {
+    return new Promise((resolve, reject) => {
+      try {
+        const py = spawn("python", ["python/churnModel.py"]);
+        let result = "";
+
+        py.stdout.on("data", (data) => {
+          result += data.toString();
+        });
+
+        py.stderr.on("data", (err) => {
+          console.error("Python Error:", err.toString());
+          reject("Python script error: " + err.toString());
+        });
+
+        py.on("close", () => {
+          try {
+            const parsed = JSON.parse(result);
+            const value = parsed.prediction;
+            if (value === "Churn" || value === "No Churn") {
+              resolve(value);
+            } else {
+              reject("Unexpected prediction value: " + value);
+            }
+          } catch {
+            reject("Failed to parse Python output.");
+          }
+        });
+
+        py.stdin.write(JSON.stringify(customerProfile));
+        py.stdin.end();
+      } catch (error) {
+        console.error("Spawn error:", error);
+        reject("Failed to run Python model");
+      }
+
     });
 
     return Math.min(score, 100);
@@ -409,3 +448,4 @@ export class ChurnPredictionService extends BaseService<ChurnPrediction> {
            (financialRisk >= 1 && engagementRisk >= 2);
   }
 }
+

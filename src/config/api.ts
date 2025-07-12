@@ -6,6 +6,7 @@ import { DataSource } from "typeorm";
 import Container from "typedi";
 import { Session } from "@/models/Session";
 import { TypeormStore } from "typeorm-store";
+import cors from "cors";
 
 export default function config() {
   const app = Router();
@@ -15,6 +16,12 @@ export default function config() {
 
   app.use(express.urlencoded({ extended: false }));
   app.use(express.json());
+  app.use(
+    cors({
+      origin: [process.env.WEB_APP_HOST, process.env.MOBILE_APP_HOST],
+      credentials: true
+    })
+  );
   app.use(
     session({
       secret: process.env.SESSION_SECRET,

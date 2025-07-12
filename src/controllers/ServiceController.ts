@@ -4,7 +4,7 @@ import { UserRole } from "@/models/User";
 import { BankService } from "@/services/BankService";
 import { ServiceService } from "@/services/Service";
 import { UserService } from "@/services/UserService";
-import { Request } from "express";
+import { Request, Response } from "express";
 import Container, { Service } from "typedi";
 import { FindOptionsWhere } from "typeorm";
 import { z, ZodType } from "zod";
@@ -38,7 +38,7 @@ export class ServiceController extends BaseController<ServiceEntity> {
 
   protected override async getScopedWhere(
     req: Request
-  ): Promise<FindOptionsWhere<ServiceEntity>> {
+  ): Promise<FindOptionsWhere<ServiceEntity> | null> {
     const user = (await Container.get(UserService).findById(req.user!.id, {
       bank: true,
       branch: true
@@ -46,6 +46,38 @@ export class ServiceController extends BaseController<ServiceEntity> {
 
     if (user.role === UserRole.ADMIN) return { bank: { id: user.bank.id } };
 
-    return {};
+    return null;
+  }
+
+  public override async list(req: Request, res: Response): Promise<void> {
+    const user = (await Container.get(UserService).findById(req.user!.id))!;
+
+    if (user.role !== UserRole.CUSTOMER) return super.list(req, res);
+
+    if (
+      !req.query.bankId ||
+      typeof req.query.bankId !== "string" ||
+      z.string().uuid().safeParse(req.query.bankId).error
+    ) {
+      res.status(404).json({
+        error: { message: "Missing or invalid [bankId] query parameter" }
+      });
+      return;
+    }
+
+    const entities = await this.service.find({
+      bank: { id: req.query.bankId }
+    });
+
+    res.json({
+      data: {
+        services: entities.map((service) => ({
+          id: service.id,
+          serviceName: service.serviceName,
+          serviceCategory: service.serviceCategory,
+          description: service.description
+        }))
+      }
+    });
   }
 }
