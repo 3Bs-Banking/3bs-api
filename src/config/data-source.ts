@@ -59,4 +59,3 @@ export const AppDataSource = new DataSource({
   subscribers: [],
   namingStrategy: new SnakeNamingStrategy()
 });
-

@@ -49,9 +49,9 @@ export class User {
   password!: string;
 
   // One-to-One relation with Employee (optional - only for users with EMPLOYEE role)
-  @OneToOne(() => Employee, (employee) => employee.user, { 
-    nullable: true, 
-    onDelete: "CASCADE" 
+  @OneToOne(() => Employee, (employee) => employee.user, {
+    nullable: true,
+    onDelete: "CASCADE"
   })
   @JoinColumn()
   employee?: Employee;
@@ -70,13 +70,20 @@ export class User {
   @BeforeUpdate()
   async hashPasswordOnUpdate() {
     console.log("🔒 BeforeUpdate: Checking if password needs hashing");
-    
+
     // Only hash if password exists and is not already hashed
-    if (this.password && !this.password.startsWith('$2b$') && !this.password.startsWith('$2a$')) {
+    if (
+      this.password &&
+      !this.password.startsWith("$2b$") &&
+      !this.password.startsWith("$2a$")
+    ) {
       console.log("🔄 Password is plain text, hashing now...");
       this.password = await bcrypt.hash(this.password, 10);
       console.log("✅ Password hashed successfully on update");
-    } else if (this.password && (this.password.startsWith('$2b$') || this.password.startsWith('$2a$'))) {
+    } else if (
+      this.password &&
+      (this.password.startsWith("$2b$") || this.password.startsWith("$2a$"))
+    ) {
       console.log("⏭️ Password already hashed, skipping");
     }
   }

@@ -27,7 +27,7 @@ app.use("/temporary-access", temporaryAccessRoutes);
 app.use("/auth", AuthRoute);
 app.use("/bank", isAuthenticated, BankRoute);
 app.use("/user", isAuthenticated, UserRoute);
-app.use("/appointment",  AppointmentRoute);
+app.use("/appointment", AppointmentRoute);
 app.use("/branch", isAuthenticated, BranchRoute);
 app.use("/customer", CustomerRoute);
 app.use("/employee", isAuthenticated, EmployeeRoute);
@@ -40,6 +40,5 @@ app.use("/fraud-predictions", isAuthenticated, FraudPredictionRoute);
 app.use("/churn-predictions", ChurnPredictionRoute);
 app.use("/forex-predictions", ForexPredictionRoute);
 app.use("/pir", PersonalInvestmentRecommendationRoutes);
-
 
 export default app;

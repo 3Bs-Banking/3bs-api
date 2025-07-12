@@ -29,12 +29,12 @@ export class ForexPredictionController extends BaseController<ForexPrediction> {
     try {
       // Extract and validate currency from query params
       const currencyParam = req.query.currency as string | undefined;
-      
+
       if (!currencyParam) {
-        res.status(400).json({ 
-          error: { 
-            message: "Missing query parameter: currency" 
-          } 
+        res.status(400).json({
+          error: {
+            message: "Missing query parameter: currency"
+          }
         });
         return;
       }
@@ -44,25 +44,27 @@ export class ForexPredictionController extends BaseController<ForexPrediction> {
 
       // Validate currency is either USD or GBP
       if (currencyUpper !== "USD" && currencyUpper !== "GBP") {
-        res.status(400).json({ 
-          error: { 
-            message: "Invalid currency. Must be either USD or GBP" 
-          } 
+        res.status(400).json({
+          error: {
+            message: "Invalid currency. Must be either USD or GBP"
+          }
         });
         return;
       }
 
       // Get the service instance
       const service = this.service as ForexPredictionService;
-      
+
       // Get the latest prediction for the currency
-      const latestPrediction = await service.getLatestByCurrency(currencyUpper as "USD" | "GBP");
+      const latestPrediction = await service.getLatestByCurrency(
+        currencyUpper as "USD" | "GBP"
+      );
 
       if (!latestPrediction) {
-        res.status(404).json({ 
-          error: { 
-            message: `No forex prediction found for currency: ${currencyUpper}` 
-          } 
+        res.status(404).json({
+          error: {
+            message: `No forex prediction found for currency: ${currencyUpper}`
+          }
         });
         return;
       }
@@ -76,12 +78,11 @@ export class ForexPredictionController extends BaseController<ForexPrediction> {
           closing: latestPrediction.predictedClose || null
         }
       });
-
-    } catch (error) {
-      res.status(500).json({ 
-        error: { 
-          message: "Internal server error" 
-        } 
+    } catch {
+      res.status(500).json({
+        error: {
+          message: "Internal server error"
+        }
       });
     }
   }

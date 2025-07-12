@@ -72,15 +72,24 @@ export class ChurnPredictionController extends BaseController<ChurnPrediction> {
    */
   protected async validatePostBody(body: any) {
     const validatedBody = await super.validatePostBody(body);
-    
+
     // Additional business rule validations
-    this.validateOneHotEncoding(validatedBody.customerProfile, 'Education_Level');
-    this.validateOneHotEncoding(validatedBody.customerProfile, 'Marital_Status');
-    this.validateOneHotEncoding(validatedBody.customerProfile, 'Income_Category');
-    this.validateOneHotEncoding(validatedBody.customerProfile, 'Card_Category');
-    
+    this.validateOneHotEncoding(
+      validatedBody.customerProfile,
+      "Education_Level"
+    );
+    this.validateOneHotEncoding(
+      validatedBody.customerProfile,
+      "Marital_Status"
+    );
+    this.validateOneHotEncoding(
+      validatedBody.customerProfile,
+      "Income_Category"
+    );
+    this.validateOneHotEncoding(validatedBody.customerProfile, "Card_Category");
+
     this.validateFinancialConsistency(validatedBody.customerProfile);
-    
+
     return validatedBody;
   }
 
@@ -88,11 +97,13 @@ export class ChurnPredictionController extends BaseController<ChurnPrediction> {
    * Validates one-hot encoding - exactly one field should be 1
    */
   private validateOneHotEncoding(profile: any, prefix: string) {
-    const fields = Object.keys(profile).filter(key => key.startsWith(prefix));
+    const fields = Object.keys(profile).filter((key) => key.startsWith(prefix));
     const activeCount = fields.reduce((sum, field) => sum + profile[field], 0);
-    
+
     if (activeCount !== 1) {
-      throw new Error(`Invalid ${prefix} encoding: exactly one field must be 1, got ${activeCount}`);
+      throw new Error(
+        `Invalid ${prefix} encoding: exactly one field must be 1, got ${activeCount}`
+      );
     }
   }
 
@@ -106,27 +117,39 @@ export class ChurnPredictionController extends BaseController<ChurnPrediction> {
     }
 
     // Available credit should be consistent
-    const expectedAvailableCredit = profile.Credit_Limit - profile.Total_Revolving_Bal;
+    const expectedAvailableCredit =
+      profile.Credit_Limit - profile.Total_Revolving_Bal;
     const tolerance = 100; // Allow small rounding differences
-    
-    if (Math.abs(profile.Avg_Open_To_Buy - expectedAvailableCredit) > tolerance) {
-      throw new Error("Average open to buy amount is inconsistent with credit limit and balance");
+
+    if (
+      Math.abs(profile.Avg_Open_To_Buy - expectedAvailableCredit) > tolerance
+    ) {
+      throw new Error(
+        "Average open to buy amount is inconsistent with credit limit and balance"
+      );
     }
 
     // Utilization ratio should be consistent
-    const expectedUtilization = profile.Total_Revolving_Bal / profile.Credit_Limit;
+    const expectedUtilization =
+      profile.Total_Revolving_Bal / profile.Credit_Limit;
     if (Math.abs(profile.Avg_Utilization_Ratio - expectedUtilization) > 0.05) {
-      throw new Error("Utilization ratio is inconsistent with balance and credit limit");
+      throw new Error(
+        "Utilization ratio is inconsistent with balance and credit limit"
+      );
     }
 
     // Transaction ratios should be reasonable
     if (profile.Total_Amt_Chng_Q4_Q1 > 10 || profile.Total_Ct_Chng_Q4_Q1 > 10) {
-      throw new Error("Transaction change ratios seem unrealistic (>1000% change)");
+      throw new Error(
+        "Transaction change ratios seem unrealistic (>1000% change)"
+      );
     }
 
     // Age should be reasonable for financial products
     if (profile.Customer_Age < 18) {
-      throw new Error("Customer age must be at least 18 for financial products");
+      throw new Error(
+        "Customer age must be at least 18 for financial products"
+      );
     }
   }
 

@@ -7,8 +7,8 @@ const app = Router();
 const controller = Container.get(UserController);
 
 app.get("/", (req, res) => controller.list(req, res));
-  app.post("/verify-password", (req, res) => controller.verifyPassword(req, res));
-  app.post("/change-password", (req, res) => controller.verifyPassword(req, res));
+app.post("/verify-password", (req, res) => controller.verifyPassword(req, res));
+app.post("/change-password", (req, res) => controller.verifyPassword(req, res));
 // app.get("/:user", (req, res) => controller.getId(req, res));
 // app.post("/", (req, res) => controller.post(req, res));
 // app.patch("/:user", (req, res) => controller.update(req, res));

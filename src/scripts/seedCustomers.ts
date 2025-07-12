@@ -3,7 +3,11 @@ import { Customer } from "@/models/Customer";
 import { Service } from "@/models/Service";
 import { Window } from "@/models/Window";
 import { Employee } from "@/models/Employee";
-import { Appointment, AppointmentStatus, ReservationType } from "@/models/Appointment";
+import {
+  Appointment,
+  AppointmentStatus,
+  ReservationType
+} from "@/models/Appointment";
 
 const BANK_ID = "e8bc09c4-487c-45cd-98da-abc27024a178";
 const BRANCH_ID = "2e6e9c4a-b0e6-4fd9-80b8-0ccefc7eaefd";
@@ -118,7 +122,9 @@ async function seed() {
       console.log(`📅 Appointment created for ${customer.fullName}`);
     }
 
-    console.log("\n🎉 All 3 customers, employee, service, window, and appointments created successfully.");
+    console.log(
+      "\n🎉 All 3 customers, employee, service, window, and appointments created successfully."
+    );
     await AppDataSource.destroy();
   } catch (err) {
     console.error("❌ Error:", err);

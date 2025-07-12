@@ -18,21 +18,26 @@ async function start() {
   const app = express();
 
   // CORS Configuration - MUST be before other middleware
-  app.use(cors({
-    origin: 'http://localhost:3000',     // Frontend URL
-    credentials: true,                   // Allow cookies/sessions
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'],
-    exposedHeaders: ['Set-Cookie']
-  }));
+  app.use(
+    cors({
+      origin: "http://localhost:3000", // Frontend URL
+      credentials: true, // Allow cookies/sessions
+      methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+      allowedHeaders: ["Content-Type", "Authorization", "Cookie"],
+      exposedHeaders: ["Set-Cookie"]
+    })
+  );
 
   // Handle preflight OPTIONS requests
-  app.options('*', cors({
-    origin: 'http://localhost:3000',
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'Cookie']
-  }));
+  app.options(
+    "*",
+    cors({
+      origin: "http://localhost:3000",
+      credentials: true,
+      methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+      allowedHeaders: ["Content-Type", "Authorization", "Cookie"]
+    })
+  );
 
   // Apply your existing API configuration
   app.use(apiConfig());
@@ -46,11 +51,11 @@ async function start() {
   console.log("Forex Price Scheduler started successfully");
 
   const PORT = process.env.PORT || 5000;
-  const HOST = process.env.HOST || 'localhost';
+  const HOST = process.env.HOST || "localhost";
 
   app.listen(PORT, () => {
     console.log(`Server running on http://${HOST}:${PORT}`);
-    console.log(`CORS enabled for: http://localhost:3000`);
+    console.log("CORS enabled for: http://localhost:3000");
   });
 }
 

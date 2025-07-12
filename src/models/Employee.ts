@@ -28,9 +28,9 @@ export class Employee {
   branch!: Branch;
 
   // One-to-One relation with User (optional - for employees who have user accounts)
-  @OneToOne(() => User, (user) => user.employee, { 
-    nullable: true, 
-    onDelete: "CASCADE" 
+  @OneToOne(() => User, (user) => user.employee, {
+    nullable: true,
+    onDelete: "CASCADE"
   })
   user?: User;
 

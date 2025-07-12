@@ -31,7 +31,7 @@ const KNOWN_EGYPTIAN_HOLIDAYS_2025 = [
   "2025-09-23", // September Equinox
   "2025-10-06", // Armed Forces Day
   "2025-12-21", // December Solstice
-  "2025-12-31", // New Year's Eve
+  "2025-12-31" // New Year's Eve
 ];
 
 // Known Egyptian holidays for 2026
@@ -61,7 +61,7 @@ const KNOWN_EGYPTIAN_HOLIDAYS_2026 = [
   "2026-09-23", // September Equinox
   "2026-10-06", // Armed Forces Day
   "2026-12-21", // December Solstice
-  "2026-12-31", // New Year's Eve
+  "2026-12-31" // New Year's Eve
 ];
 
 // Combined holidays list
@@ -73,12 +73,16 @@ const ALL_KNOWN_HOLIDAYS = [
 export async function isEgyptHoliday(date: DateTime): Promise<boolean> {
   // If API credentials are not configured, use fallback
   if (!API_KEY || !API_URL) {
-    console.warn("[HolidayService] Holiday API not configured, using fallback holiday list");
+    console.warn(
+      "[HolidayService] Holiday API not configured, using fallback holiday list"
+    );
     return checkFallbackHolidays(date.toISODate()!);
   }
 
   try {
-    console.log(`[HolidayService] Checking if ${date.toISODate()} is an Egyptian holiday...`);
+    console.log(
+      `[HolidayService] Checking if ${date.toISODate()} is an Egyptian holiday...`
+    );
 
     const response = await axios.get(API_URL, {
       params: {
@@ -91,41 +95,56 @@ export async function isEgyptHoliday(date: DateTime): Promise<boolean> {
       }
     });
 
-    const holidays = response.data.holidays as { date: string; name?: string }[];
+    const holidays = response.data.holidays as {
+      date: string;
+      name?: string;
+    }[];
     const isHoliday = holidays.some((h) => h.date === date.toISODate());
-    
+
     if (isHoliday) {
-      const holidayName = holidays.find((h) => h.date === date.toISODate())?.name || "Unknown Holiday";
-      console.log(`[HolidayService] ${date.toISODate()} is a holiday: ${holidayName}`);
+      const holidayName =
+        holidays.find((h) => h.date === date.toISODate())?.name ||
+        "Unknown Holiday";
+      console.log(
+        `[HolidayService] ${date.toISODate()} is a holiday: ${holidayName}`
+      );
     } else {
       console.log(`[HolidayService] ${date.toISODate()} is not a holiday`);
     }
 
     return isHoliday;
   } catch (err: unknown) {
-  let message = "Unknown error";
+    let message = "Unknown error";
 
-  if (err instanceof Error) {
-    message = err.message;
-  }
-
-  if (typeof err === "object" && err !== null && "response" in err) {
-    const response = (err as any).response;
-    const status = response?.status;
-
-    if (status === 402) {
-      console.error(`[HolidayService] API Payment Required (402) - API key may have expired. Using fallback.`);
-    } else if (status === 401) {
-      console.error(`[HolidayService] API Unauthorized (401) - Invalid API key. Using fallback.`);
-    } else {
-      console.error(`[HolidayService] API Error ${status} for ${date.toISODate()}. Using fallback.`);
+    if (err instanceof Error) {
+      message = err.message;
     }
-  } else {
-    console.error(`[HolidayService] Failed to fetch holiday data for ${date.toISODate()}: ${message}. Using fallback.`);
-  }
 
-  return checkFallbackHolidays(date.toISODate() ?? "");
-}
+    if (typeof err === "object" && err !== null && "response" in err) {
+      const response = (err as any).response;
+      const status = response?.status;
+
+      if (status === 402) {
+        console.error(
+          "[HolidayService] API Payment Required (402) - API key may have expired. Using fallback."
+        );
+      } else if (status === 401) {
+        console.error(
+          "[HolidayService] API Unauthorized (401) - Invalid API key. Using fallback."
+        );
+      } else {
+        console.error(
+          `[HolidayService] API Error ${status} for ${date.toISODate()}. Using fallback.`
+        );
+      }
+    } else {
+      console.error(
+        `[HolidayService] Failed to fetch holiday data for ${date.toISODate()}: ${message}. Using fallback.`
+      );
+    }
+
+    return checkFallbackHolidays(date.toISODate() ?? "");
+  }
 }
 
 /**
@@ -133,13 +152,17 @@ export async function isEgyptHoliday(date: DateTime): Promise<boolean> {
  */
 function checkFallbackHolidays(dateString: string): boolean {
   const isKnownHoliday = ALL_KNOWN_HOLIDAYS.includes(dateString);
-  
+
   if (isKnownHoliday) {
-    console.log(`[HolidayService] ${dateString} is a known Egyptian holiday (fallback list)`);
+    console.log(
+      `[HolidayService] ${dateString} is a known Egyptian holiday (fallback list)`
+    );
   } else {
-    console.log(`[HolidayService] ${dateString} is not in known holiday list (fallback)`);
+    console.log(
+      `[HolidayService] ${dateString} is not in known holiday list (fallback)`
+    );
   }
-  
+
   return isKnownHoliday;
 }
 
@@ -205,7 +228,7 @@ export function getHolidayName(dateString: string): string | null {
     "2025-10-06": "Armed Forces Day",
     "2025-12-21": "December Solstice",
     "2025-12-31": "New Year's Eve",
-    
+
     // 2026 holidays (same names, different dates if needed)
     "2026-01-01": "New Year's Day",
     "2026-01-06": "Orthodox Christmas Eve",
@@ -231,7 +254,7 @@ export function getHolidayName(dateString: string): string | null {
     "2026-09-23": "September Equinox",
     "2026-10-06": "Armed Forces Day",
     "2026-12-21": "December Solstice",
-    "2026-12-31": "New Year's Eve",
+    "2026-12-31": "New Year's Eve"
   };
 
   return holidayNames[dateString] || null;

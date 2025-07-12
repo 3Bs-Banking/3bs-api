@@ -37,7 +37,9 @@ export class UserController extends BaseController<User> {
         return;
       }
       if (!password) {
-        res.status(400).json({ success: false, message: "Password is required" });
+        res
+          .status(400)
+          .json({ success: false, message: "Password is required" });
         return;
       }
       // Fetch the full user entity from the DB
@@ -55,8 +57,9 @@ export class UserController extends BaseController<User> {
       }
     } catch (err) {
       console.error("Password verification error:", err);
-      res.status(500).json({ success: false, message: "Server error verifying password" });
+      res
+        .status(500)
+        .json({ success: false, message: "Server error verifying password" });
     }
   }
-  
 }

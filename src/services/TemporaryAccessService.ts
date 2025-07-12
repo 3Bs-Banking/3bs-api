@@ -10,7 +10,12 @@ export class TemporaryAccessService extends BaseService<TemporaryAccess> {
     super(TemporaryAccess);
   }
 
-  async grantTemporaryAccess(user: User, newRole: string, expiresAt: Date, createdBy: User) {
+  async grantTemporaryAccess(
+    user: User,
+    newRole: string,
+    expiresAt: Date,
+    createdBy: User
+  ) {
     // Validate and cast newRole
     if (!Object.values(UserRole).includes(newRole as UserRole)) {
       throw new Error("Invalid role");
@@ -24,7 +29,7 @@ export class TemporaryAccessService extends BaseService<TemporaryAccess> {
       previousRole,
       newRole,
       expiresAt,
-      createdBy,
+      createdBy
     });
     return await this.repository.save(tempAccess);
   }

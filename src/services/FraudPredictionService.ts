@@ -3,7 +3,7 @@ import { FraudPrediction } from "@/models/FraudPrediction";
 import { Bank } from "@/models/Bank";
 import { Service } from "typedi";
 import { DeepPartial } from "typeorm";
-import { spawn } from "child_process";
+// import { spawn } from "child_process";
 
 @Service()
 export class FraudPredictionService extends BaseService<FraudPrediction> {

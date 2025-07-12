@@ -3,7 +3,7 @@ import { AccessManagementService } from "@/services/AccessManagementService";
 import { UserRole } from "@/models/User";
 import Container, { Service } from "typedi";
 import { z } from "zod";
-import { v4 as uuidv4 } from 'uuid';
+import { v4 as uuidv4 } from "uuid";
 
 @Service()
 export class AccessManagementController {
@@ -15,7 +15,7 @@ export class AccessManagementController {
 
   // Generate employee ID helper function
   private generateEmployeeId(): string {
-    return 'EMP-' + uuidv4().substring(0, 8).toUpperCase();
+    return "EMP-" + uuidv4().substring(0, 8).toUpperCase();
   }
 
   // Create user directly (renamed from createAccess)
@@ -31,7 +31,7 @@ export class AccessManagementController {
         branchId: z.string().uuid("Invalid branch ID"),
         email: z.string().email().optional(),
         notes: z.string().optional(),
-        accessType: z.enum(['new', 'escalation']).optional().default('new')
+        accessType: z.enum(["new", "escalation"]).optional().default("new")
       });
 
       const validatedData = schema.parse(req.body);
@@ -39,7 +39,7 @@ export class AccessManagementController {
 
       // Auto-generate employee ID for new employees if not provided
       let employeeId = validatedData.employeeId;
-      if (validatedData.accessType === 'new' && !employeeId) {
+      if (validatedData.accessType === "new" && !employeeId) {
         employeeId = this.generateEmployeeId();
       }
 
@@ -61,10 +61,11 @@ export class AccessManagementController {
 
       res.status(201).json({
         success: true,
-        message: validatedData.accessType === 'escalation' 
-          ? "Privilege escalation request created successfully" 
-          : "New employee access request created successfully",
-        data: { 
+        message:
+          validatedData.accessType === "escalation"
+            ? "Privilege escalation request created successfully"
+            : "New employee access request created successfully",
+        data: {
           user,
           employeeId: employeeId // Return the employee ID (generated or provided)
         }
@@ -148,7 +149,11 @@ export class AccessManagementController {
       const { notes } = req.body;
       const approvedById = req.user!.id;
 
-      const result = await this.accessService.rejectAccess(id, approvedById, notes);
+      const result = await this.accessService.rejectAccess(
+        id,
+        approvedById,
+        notes
+      );
 
       res.json({
         success: true,
@@ -215,7 +220,7 @@ export class AccessManagementController {
   async getUsersByRole(req: Request, res: Response): Promise<void> {
     try {
       const { role } = req.params;
-      
+
       if (!Object.values(UserRole).includes(role as UserRole)) {
         res.status(400).json({
           success: false,
@@ -308,7 +313,10 @@ export class AccessManagementController {
       });
 
       const { password } = schema.parse(req.body);
-      const isValid = await this.accessService.validateAccessPassword(id, password);
+      const isValid = await this.accessService.validateAccessPassword(
+        id,
+        password
+      );
 
       res.json({
         success: true,

@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import { Service } from "typedi";
 import { TemporaryAccessService } from "@/services/TemporaryAccessService";
 import { UserService } from "@/services/UserService";
-import { User, UserRole } from "@/models/User";
+import { UserRole } from "@/models/User";
 import { z } from "zod";
 
 @Service()
@@ -28,12 +28,13 @@ export class TemporaryAccessController {
     }
     res.json({ data: { temporaryAccess: record } });
   }
-  
 
   // Create a new temporary access record (grant access)
   async post(req: Request, res: Response): Promise<void> {
     // This can be used for generic creation if needed
-    res.status(501).json({ error: { message: "Not implemented. Use /grant endpoint." } });
+    res
+      .status(501)
+      .json({ error: { message: "Not implemented. Use /grant endpoint." } });
   }
 
   // Update a temporary access record (if needed)
@@ -69,14 +70,16 @@ export class TemporaryAccessController {
       userId: z.string().uuid(),
       newRole: z.nativeEnum(UserRole),
       expiresAt: z.string(),
-      password: z.string(),
+      password: z.string()
     });
 
     let parsed;
     try {
       parsed = schema.parse(req.body);
     } catch (err) {
-      res.status(400).json({ success: false, message: "Invalid request", error: err });
+      res
+        .status(400)
+        .json({ success: false, message: "Invalid request", error: err });
       return;
     }
 
