@@ -108,7 +108,7 @@ export class AppointmentService extends BaseService<Appointment> {
         : 0;
 
       if (Math.abs(diff) <= GRACE_PERIOD) baseScore = 100;
-      else if (diff > 0 && diff <= EARLY_LIMIT) baseScore = 9;
+      else if (diff > 0 && diff <= EARLY_LIMIT) baseScore = 90;
       else if (diff > EARLY_LIMIT) baseScore = 60;
       else baseScore = 50;
     } else {
